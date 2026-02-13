@@ -1,4 +1,5 @@
 import React from 'react';
+import FilterBar from '../components/home/FilterBar';
 import HeroSlider from '../components/home/HeroSlider';
 import PromoCardCarousel from '../components/home/PromoCardCarousel';
 import cardimg from '../assets/card.jpg';
@@ -8,6 +9,7 @@ const Home = () => {
     return (
         <div>
             <HeroSlider />
+            <FilterBar />
 
             <section className="px-4 sm:px-6 py-6">
                 <PromoCardCarousel

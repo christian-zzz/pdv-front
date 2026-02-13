@@ -4,7 +4,7 @@ import logo from '../../assets/logo.png';
 
 const Header = () => {
     return (
-        <header className="sticky top-0 left-0 right-0 z-50 grid grid-cols-[1fr_auto_1fr] items-center py-1 px-12 backdrop-blur-xs border-b  border-white/10 shadow-lg text-[#001e6b]">
+        <header className="sticky top-0 left-0 right-0 z-50 grid grid-cols-[1fr_auto_1fr] items-center py-1 px-12 backdrop-blur-lg border-b  border-white/10 shadow-lg text-[#001e6b]">
             {/* Left Links */}
             <div className="flex justify-end gap-8 text-lg font-medium pr-8">
                 <Link to="/" className="hover:text-amber-600 transition-colors">Inicio</Link>
