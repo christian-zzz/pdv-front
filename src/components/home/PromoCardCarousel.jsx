@@ -98,13 +98,15 @@ const PromoCardCarousel = ({ title, subtitle, items = [], className = '' }) => {
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
             </button>
-            <button
-                type="button"
-                onClick={() => alert('Ver más clicked')}
-                className="rounded-full mx-auto bg-[#ed6f00] px-4 py-1.5 text-xs font-semibold text-white shadow-md transition-transform duration-200 hover:scale-[1.02]"
-            >
-                Ver Más
-            </button>
+            <div className="flex justify-center mt-5">
+                <button
+                    type="button"
+                    onClick={() => alert('Ver más clicked')}
+                    className="rounded-full bg-[#ed6f00] px-6 py-2 text-sm font-semibold text-white shadow-md transition-transform duration-200 hover:scale-[1.02]"
+                >
+                    Ver Más
+                </button>
+            </div>
         </div>
     );
 };
