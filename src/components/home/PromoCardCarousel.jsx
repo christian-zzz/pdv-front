@@ -29,7 +29,7 @@ const PromoCardCarousel = ({ title, subtitle, items = [], className = '' }) => {
     }
 
     return (
-        <div className={`relative w-min justify-self-center ${className}`}>
+        <div className={`relative w-min justify-self-center`}>
             {(title || subtitle) && (
                 <div className="mb-5 text-center">
                     {title && (
@@ -97,6 +97,13 @@ const PromoCardCarousel = ({ title, subtitle, items = [], className = '' }) => {
                 >
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
+            </button>
+            <button
+                type="button"
+                onClick={() => alert('Ver más clicked')}
+                className="rounded-full mx-auto bg-[#ed6f00] px-4 py-1.5 text-xs font-semibold text-white shadow-md transition-transform duration-200 hover:scale-[1.02]"
+            >
+                Ver Más
             </button>
         </div>
     );

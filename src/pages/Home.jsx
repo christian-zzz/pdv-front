@@ -23,8 +23,8 @@ const Home = () => {
                             subtitle: 'Vive la experiencia todo incluido en la isla de Margarita',
                             priceLabel: 'Desde',
                             priceValue: '$54',
-                            ctaLabel: 'Ver más',
-                            onCtaClick: () => alert('Ver más clicked'),
+                            ctaLabel: 'Reservar',
+                            onCtaClick: () => alert('Reservar clicked'),
                         },
                         {
                             id: 2,
@@ -33,8 +33,8 @@ const Home = () => {
                             subtitle: 'Relájate con paquetes pensados para ti y tu familia',
                             priceLabel: 'Desde',
                             priceValue: '$72',
-                            ctaLabel: 'Ver más',
-                            onCtaClick: () => alert('Ver más clicked'),
+                            ctaLabel: 'Reservar',
+                            onCtaClick: () => alert('Reservar clicked'),
                         },
                         {
                             id: 3,
@@ -43,8 +43,8 @@ const Home = () => {
                             subtitle: 'Disfruta experiencias únicas con servicios premium',
                             priceLabel: 'Desde',
                             priceValue: '$65',
-                            ctaLabel: 'Ver más',
-                            onCtaClick: () => alert('Ver más clicked'),
+                            ctaLabel: 'Reservar',
+                            onCtaClick: () => alert('Reservar clicked'),
                         },
                         {
                             id: 4,
@@ -53,8 +53,8 @@ const Home = () => {
                             subtitle: 'Encuentra tu lugar ideal con atención personalizada',
                             priceLabel: 'Desde',
                             priceValue: '$58',
-                            ctaLabel: 'Ver más',
-                            onCtaClick: () => alert('Ver más clicked'),
+                            ctaLabel: 'Reservar',
+                            onCtaClick: () => alert('Reservar clicked'),
                         },
                         {
                             id: 5,
@@ -63,8 +63,8 @@ const Home = () => {
                             subtitle: 'Promociones especiales para viajes en grupo',
                             priceLabel: 'Desde',
                             priceValue: '$80',
-                            ctaLabel: 'Ver más',
-                            onCtaClick: () => alert('Ver más clicked'),
+                            ctaLabel: 'Reservar',
+                            onCtaClick: () => alert('Reservar clicked'),
                         },
                         {
                             id: 6,
@@ -73,8 +73,8 @@ const Home = () => {
                             subtitle: 'Momentos inolvidables en destinos seleccionados',
                             priceLabel: 'Desde',
                             priceValue: '$90',
-                            ctaLabel: 'Ver más',
-                            onCtaClick: () => alert('Ver más clicked'),
+                            ctaLabel: 'Reservar',
+                            onCtaClick: () => alert('Reservar clicked'),
                         },
                     ]}
                 />
@@ -92,8 +92,8 @@ const Home = () => {
                             subtitle: 'Vive la experiencia todo incluido en la isla de Margarita',
                             priceLabel: 'Desde',
                             priceValue: '$54',
-                            ctaLabel: 'Ver más',
-                            onCtaClick: () => alert('Ver más clicked'),
+                            ctaLabel: 'Reservar',
+                            onCtaClick: () => alert('Reservar clicked'),
                         },
                         {
                             id: 2,
@@ -102,8 +102,8 @@ const Home = () => {
                             subtitle: 'Relájate con paquetes pensados para ti y tu familia',
                             priceLabel: 'Desde',
                             priceValue: '$72',
-                            ctaLabel: 'Ver más',
-                            onCtaClick: () => alert('Ver más clicked'),
+                            ctaLabel: 'Reservar',
+                            onCtaClick: () => alert('Reservar clicked'),
                         },
                         {
                             id: 3,
@@ -112,8 +112,8 @@ const Home = () => {
                             subtitle: 'Disfruta experiencias únicas con servicios premium',
                             priceLabel: 'Desde',
                             priceValue: '$65',
-                            ctaLabel: 'Ver más',
-                            onCtaClick: () => alert('Ver más clicked'),
+                            ctaLabel: 'Reservar',
+                            onCtaClick: () => alert('Reservar clicked'),
                         },
                         {
                             id: 4,
@@ -122,8 +122,8 @@ const Home = () => {
                             subtitle: 'Encuentra tu lugar ideal con atención personalizada',
                             priceLabel: 'Desde',
                             priceValue: '$58',
-                            ctaLabel: 'Ver más',
-                            onCtaClick: () => alert('Ver más clicked'),
+                            ctaLabel: 'Reservar',
+                            onCtaClick: () => alert('Reservar clicked'),
                         },
                         {
                             id: 5,
@@ -132,8 +132,8 @@ const Home = () => {
                             subtitle: 'Promociones especiales para viajes en grupo',
                             priceLabel: 'Desde',
                             priceValue: '$80',
-                            ctaLabel: 'Ver más',
-                            onCtaClick: () => alert('Ver más clicked'),
+                            ctaLabel: 'Reservar',
+                            onCtaClick: () => alert('Reservar clicked'),
                         },
                         {
                             id: 6,
@@ -142,8 +142,8 @@ const Home = () => {
                             subtitle: 'Momentos inolvidables en destinos seleccionados',
                             priceLabel: 'Desde',
                             priceValue: '$90',
-                            ctaLabel: 'Ver más',
-                            onCtaClick: () => alert('Ver más clicked'),
+                            ctaLabel: 'Reservar',
+                            onCtaClick: () => alert('Reservar clicked'),
                         },
                     ]}
                 />

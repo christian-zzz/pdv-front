@@ -10,11 +10,10 @@ const PromoCard = ({
     priceValue,
     ctaLabel,
     onCtaClick,
-    className = '',
 }) => {
     return (
         <div
-            className={`w-full max-w-[220px] sm:max-w-[240px] bg-white rounded-2xl shadow-lg overflow-hidden border border-white/70 transition-transform duration-200 hover:scale-[1.02] ${className}`}
+            className={`w-full max-w-[220px] sm:max-w-[240px] bg-white rounded-2xl shadow-lg overflow-hidden border border-white/70 transition-transform duration-200 hover:scale-[1.02]`}
         >
             <div className="relative w-full  overflow-hidden">
                 <img
