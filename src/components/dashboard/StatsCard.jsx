@@ -8,15 +8,17 @@ const ArrowIcon = () => (
 );
 
 /**
- * StatsCard — hovering reveals the orange gradient.
+ * StatsCard — the entire card is clickable. Hovering reveals the orange gradient.
  * @param {string}        label - Card label
  * @param {string|number} value - Statistic value
  * @param {string}        to    - Link target
  */
 const StatsCard = ({ label, value, to = '#' }) => {
     return (
-        <div className="group relative flex flex-col justify-between rounded-2xl p-5 overflow-hidden min-h-[130px] shadow-sm hover:shadow-lg hover:shadow-orange-200 transition-all duration-300 cursor-pointer">
-
+        <Link
+            to={to}
+            className="group relative flex flex-col justify-between rounded-2xl p-5 overflow-hidden min-h-[130px] shadow-sm hover:shadow-lg hover:shadow-orange-200 transition-all duration-300"
+        >
             {/* ── Base: orange gradient (always underneath) ── */}
             <div className="absolute inset-0 bg-linear-to-br from-[#ed6f00] to-[#f5930a] rounded-2xl" />
 
@@ -36,15 +38,11 @@ const StatsCard = ({ label, value, to = '#' }) => {
                 <span className="text-5xl font-extrabold tracking-tight text-[#001f6c] group-hover:text-white transition-colors duration-300">
                     {value}
                 </span>
-                <Link
-                    to={to}
-                    onClick={(e) => e.stopPropagation()}
-                    className="text-[#001f6c]/40 group-hover:text-white/80 hover:text-white! transition-colors duration-300"
-                >
+                <span className="text-[#001f6c]/40 group-hover:text-white/80 transition-colors duration-300">
                     <ArrowIcon />
-                </Link>
+                </span>
             </div>
-        </div>
+        </Link>
     );
 };
 

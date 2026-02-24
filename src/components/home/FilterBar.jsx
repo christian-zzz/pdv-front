@@ -71,15 +71,17 @@ const FilterBar = () => {
                     />
 
                     {/* Search button */}
-                    <button
-                        type="button"
-                        aria-label="Buscar"
-                        className="mx-auto flex h-11 w-11 items-center justify-center rounded-full bg-[#ed6f00] text-white shadow-md transition-all duration-200 hover:bg-[#ed6f00]/80 hover:scale-105 active:scale-95"
-                    >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-5 w-5">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                        </svg>
-                    </button>
+                    <div className="flex justify-center">
+                        <button
+                            type="button"
+                            aria-label="Buscar"
+                            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#ed6f00] text-white shadow-md transition-all duration-200 hover:bg-[#d96200] hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ed6f00] focus-visible:ring-offset-2"
+                        >
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" className="h-5 w-5">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+                            </svg>
+                        </button>
+                    </div>
                 </div>
 
                 {/* Price range */}

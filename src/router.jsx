@@ -2,6 +2,7 @@ import { createBrowserRouter } from 'react-router-dom';
 import Layout from './layouts/Layout';
 import DashboardLayout from './layouts/DashboardLayout';
 import Home from './pages/Home';
+import PackageDetail from './pages/PackageDetail';
 import Dashboard from './pages/Dashboard';
 import Paquetes from './pages/admin/Paquetes';
 import Vuelos from './pages/admin/Vuelos';
@@ -19,6 +20,10 @@ const router = createBrowserRouter([
                 element: <Home />,
             },
             // Add other public routes here
+            {
+                path: 'package/:id',
+                element: <PackageDetail />,
+            },
         ],
     },
     {

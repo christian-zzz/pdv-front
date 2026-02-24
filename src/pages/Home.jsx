@@ -11,7 +11,7 @@ const Home = () => {
             <HeroSlider />
             <FilterBar />
 
-            <section className="px-4 sm:px-6 py-6">
+            <section className="px-4 sm:px-6 py-10">
                 <PromoCardCarousel
                     title="Paquetes irresistibles"
                     subtitle="Viaja pagando en comodas cuotas"
@@ -80,7 +80,7 @@ const Home = () => {
                 />
             </section>
 
-            <section className="px-4 sm:px-6 py-6">
+            <section className="px-4 sm:px-6 py-10">
                 <PromoCardCarousel
                     title="Oferta en Boleteria Aerea"
                     subtitle="Boleteria nacional e internacional"

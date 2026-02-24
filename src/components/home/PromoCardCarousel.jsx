@@ -1,39 +1,94 @@
-import React, { useMemo, useState } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Link } from 'react-router-dom';
 import PromoCard from './PromoCard';
 
-const PromoCardCarousel = ({ title, subtitle, items = [], className = '' }) => {
-    const visibleCount = 3;
-    const [currentIndex, setCurrentIndex] = useState(0);
+const GAP = 24; // gap-6 = 1.5rem = 24px
 
-    const safeItems = useMemo(() => items.filter(Boolean), [items]);
-    const maxIndex = Math.max(safeItems.length - visibleCount, 0);
+/** How many cards to show based on the container's pixel width */
+const getVisible = (width) => {
+    if (width >= 960) return 4;
+    if (width >= 680) return 3;
+    if (width >= 440) return 2;
+    return 1;
+};
 
-    const handlePrev = () => {
-        if (safeItems.length <= visibleCount) {
-            return;
+const PromoCardCarousel = ({ title, subtitle, items = [], className = '', verMasHref }) => {
+    const safeItems = items.filter(Boolean);
+    const total = safeItems.length;
+
+    const containerRef = useRef(null);
+    const [visible, setVisible] = useState(4);
+    const [cardWidth, setCardWidth] = useState(0);
+
+    // Derive both visible count and card width from the same ResizeObserver entry
+    useEffect(() => {
+        const measure = () => {
+            if (!containerRef.current) return;
+            const w = containerRef.current.offsetWidth;
+            const v = getVisible(w);
+            const cw = Math.floor((w - GAP * (v - 1)) / v);
+            setVisible(v);
+            setCardWidth(cw);
+        };
+        measure();
+        const ro = new ResizeObserver(measure);
+        if (containerRef.current) ro.observe(containerRef.current);
+        return () => ro.disconnect();
+    }, []);
+
+    // --- Infinite-loop clone state ---
+    // We need to reset index whenever `visible` changes (different clone offsets)
+    const [index, setIndex] = useState(visible);
+    const [animate, setAnimate] = useState(true);
+
+    // When visible changes, silently snap back to real item #0
+    useEffect(() => {
+        setAnimate(false);
+        setIndex(visible);           // new clone-adjusted start position
+    }, [visible]);
+
+    // Re-enable animate after silent jump
+    useEffect(() => {
+        if (!animate) {
+            const id = requestAnimationFrame(() =>
+                requestAnimationFrame(() => setAnimate(true))
+            );
+            return () => cancelAnimationFrame(id);
         }
+    }, [animate]);
 
-        setCurrentIndex((prev) => (prev === 0 ? maxIndex : prev - 1));
-    };
+    // Extended array: `visible` clones at start + real items + `visible` clones at end
+    const extended = [
+        ...safeItems.slice(-visible),
+        ...safeItems,
+        ...safeItems.slice(0, visible),
+    ];
 
-    const handleNext = () => {
-        if (safeItems.length <= visibleCount) {
-            return;
+    const go = useCallback((dir) => {
+        setAnimate(true);
+        setIndex((prev) => prev + dir);
+    }, []);
+
+    const handleTransitionEnd = useCallback(() => {
+        if (index >= total + visible) {
+            setAnimate(false);
+            setIndex(visible);
+        } else if (index < visible) {
+            setAnimate(false);
+            setIndex(total + visible - 1);
         }
+    }, [index, total, visible]);
 
-        setCurrentIndex((prev) => (prev === maxIndex ? 0 : prev + 1));
-    };
+    if (total === 0) return null;
 
-    if (safeItems.length === 0) {
-        return null;
-    }
+    const trackOffset = cardWidth > 0 ? -(index * (cardWidth + GAP)) : 0;
 
     return (
-        <div className={`relative w-min justify-self-center`}>
+        <div className={`relative w-full px-10 sm:px-12 lg:px-16 ${className}`}>
             {(title || subtitle) && (
                 <div className="mb-5 text-center">
                     {title && (
-                        <h2 className="text-md font-bold uppercase tracking-wide text-[#001f6c] sm:text-3xl">
+                        <h2 className="text-lg font-bold uppercase tracking-wide text-[#001f6c] sm:text-3xl">
                             {title}
                         </h2>
                     )}
@@ -44,68 +99,68 @@ const PromoCardCarousel = ({ title, subtitle, items = [], className = '' }) => {
                     )}
                 </div>
             )}
+
+            {/* Prev arrow — lives in the outer padding zone */}
             <button
                 type="button"
-                onClick={handlePrev}
-                disabled={safeItems.length <= visibleCount}
+                onClick={() => go(-1)}
                 aria-label="Previous cards"
-                className="absolute left-0 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/80 p-2 shadow-md transition disabled:opacity-40"
+                className="absolute left-1 sm:left-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/90 hover:bg-white hover:scale-110 active:scale-95 p-2 shadow-md transition-all duration-200"
             >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    className="h-5 w-5 text-[#001f6c]"
-                >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5 text-[#001f6c]">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
                 </svg>
             </button>
 
-            <div className="overflow-hidden">
+            {/* Viewport window */}
+            <div ref={containerRef} className="overflow-hidden">
                 <div
-                    className="flex gap-6 transition-transform duration-500 ease-out"
-                    style={{ transform: `translateX(-${currentIndex * (100 / visibleCount)}%)` }}
+                    className={`flex items-stretch ${animate ? 'transition-transform duration-500 ease-in-out' : ''}`}
+                    style={{ gap: `${GAP}px`, transform: `translateX(${trackOffset}px)` }}
+                    onTransitionEnd={handleTransitionEnd}
                 >
-                    {safeItems.map((item, index) => (
+                    {extended.map((item, i) => (
                         <div
-                            key={item.id ?? index}
-                            className="shrink-0 flex justify-center"
-                            style={{ width: 'calc((100% - 2rem * 2) / 3)' }}
+                            key={i}
+                            className="shrink-0"
+                            style={{ width: cardWidth > 0 ? `${cardWidth}px` : `calc(${100 / visible}% - ${GAP * (visible - 1) / visible}px)` }}
                         >
-                            <PromoCard {...item} className="w-full" />
+                            <PromoCard {...item} />
                         </div>
                     ))}
                 </div>
             </div>
 
+            {/* Next arrow */}
             <button
                 type="button"
-                onClick={handleNext}
-                disabled={safeItems.length <= visibleCount}
+                onClick={() => go(1)}
                 aria-label="Next cards"
-                className="absolute right-0 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/80 p-2 shadow-md transition disabled:opacity-40"
+                className="absolute right-1 sm:right-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/90 hover:bg-white hover:scale-110 active:scale-95 p-2 shadow-md transition-all duration-200"
             >
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2"
-                    className="h-5 w-5 text-[#001f6c]"
-                >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5 text-[#001f6c]">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
                 </svg>
             </button>
+
+            {/* Ver Más */}
             <div className="flex justify-center mt-5">
-                <button
-                    type="button"
-                    onClick={() => alert('Ver más clicked')}
-                    className="rounded-full bg-[#ed6f00] px-6 py-2 text-sm font-semibold text-white shadow-md transition-transform duration-200 hover:scale-[1.02]"
-                >
-                    Ver Más
-                </button>
+                {verMasHref ? (
+                    <Link
+                        to={verMasHref}
+                        className="rounded-full bg-[#ed6f00] px-6 py-2 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:scale-[1.04] hover:bg-[#d96200] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ed6f00] focus-visible:ring-offset-2"
+                    >
+                        Ver Más
+                    </Link>
+                ) : (
+                    <button
+                        type="button"
+                        onClick={() => alert('Ver más clicked')}
+                        className="rounded-full bg-[#ed6f00] px-6 py-2 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:scale-[1.04] hover:bg-[#d96200] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ed6f00] focus-visible:ring-offset-2"
+                    >
+                        Ver Más
+                    </button>
+                )}
             </div>
         </div>
     );
