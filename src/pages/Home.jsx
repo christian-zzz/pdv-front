@@ -2,8 +2,52 @@ import React from 'react';
 import FilterBar from '../components/home/FilterBar';
 import HeroSlider from '../components/home/HeroSlider';
 import PromoCardCarousel from '../components/home/PromoCardCarousel';
+import TestimonialCarousel from '../components/home/TestimonialCarousel';
 import cardimg from '../assets/card.jpg';
 import cardimg1 from '../assets/card1.jpg';
+import testimonial1 from '../assets/testimonial1.jpg';
+import testimonial2 from '../assets/testimonial2.jpg';
+import testimonial3 from '../assets/testimonial3.jpg';
+
+const TESTIMONIALS = [
+    {
+        image: testimonial1,
+        name: 'María G.',
+        stars: 5,
+        quote: 'Excelente servicio en todo. Tanto los hoteles, transporte y atención. Gracias a usted por sus servicios.',
+    },
+    {
+        image: testimonial2,
+        name: 'Carlos R.',
+        stars: 5,
+        quote: 'Excelente servicio en todo. Excelente las habitaciones, piscina, buena comida y muy buena atención.',
+    },
+    {
+        image: testimonial3,
+        name: 'Andrea P.',
+        stars: 5,
+        quote: 'La atención de mi bella Leodalbis increíble, como siempre la mejor en todo desde hace ya 3 años.',
+    },
+    // Repeated so the carousel loops nicely
+    {
+        image: testimonial1,
+        name: 'María G.',
+        stars: 5,
+        quote: 'Excelente servicio en todo. Tanto los hoteles, transporte y atención. Gracias a usted por sus servicios.',
+    },
+    {
+        image: testimonial2,
+        name: 'Carlos R.',
+        stars: 5,
+        quote: 'Excelente servicio en todo. Excelente las habitaciones, piscina, buena comida y muy buena atención.',
+    },
+    {
+        image: testimonial3,
+        name: 'Andrea P.',
+        stars: 5,
+        quote: 'La atención de mi bella Leodalbis increíble, como siempre la mejor en todo desde hace ya 3 años.',
+    },
+];
 
 const Home = () => {
     return (
@@ -148,8 +192,19 @@ const Home = () => {
                     ]}
                 />
             </section>
+
+            {/* ── Testimonials ────────────────────────────────────── */}
+            <section className="px-4 sm:px-6 py-10">
+                <TestimonialCarousel
+                    title="Lo que dicen nuestros viajeros"
+                    subtitle="Experiencias reales de quienes confiaron en nosotros"
+                    items={TESTIMONIALS}
+                />
+            </section>
         </div>
     );
 };
 
+
 export default Home;
+
