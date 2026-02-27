@@ -9,6 +9,9 @@ import Vuelos from './pages/admin/Vuelos';
 import Hoteles from './pages/admin/Hoteles';
 import Blog from './pages/admin/Blog';
 import Consultas from './pages/admin/Consultas';
+import Login from './pages/Login';
+import OAuthCallback from './pages/OAuthCallback';
+import ProtectedRoute from './components/common/ProtectedRoute';
 
 const router = createBrowserRouter([
     {
@@ -24,11 +27,23 @@ const router = createBrowserRouter([
                 path: 'package/:id',
                 element: <PackageDetail />,
             },
+            {
+                path: 'login',
+                element: <Login />,
+            },
+            {
+                path: 'auth/callback',
+                element: <OAuthCallback />,
+            },
         ],
     },
     {
         path: '/dashboard',
-        element: <DashboardLayout />,
+        element: (
+            <ProtectedRoute>
+                <DashboardLayout />
+            </ProtectedRoute>
+        ),
         children: [
             { index: true, element: <Dashboard /> },
             { path: 'paquetes', element: <Paquetes /> },

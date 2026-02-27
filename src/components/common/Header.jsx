@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
+import { useAuth } from '../../context/AuthContext';
 import logo from '../../assets/logo.png';
 
 const NAV_LINKS_LEFT = [
@@ -21,6 +22,7 @@ const HOTELES_SUBMENU = [
 const Header = () => {
     const [menuOpen, setMenuOpen] = useState(false);
     const [hotelesOpen, setHotelesOpen] = useState(false);
+    const { user, logout } = useAuth();
 
     const closeAll = () => { setMenuOpen(false); setHotelesOpen(false); };
 

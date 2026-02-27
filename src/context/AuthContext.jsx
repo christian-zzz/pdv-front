@@ -1,0 +1,93 @@
+import React, { createContext, useState, useEffect, useContext } from 'react';
+import api from '../api/axios';
+
+const AuthContext = createContext();
+
+export const AuthProvider = ({ children }) => {
+    const [user, setUser] = useState(null);
+    const [token, setToken] = useState(localStorage.getItem('token') || null);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        if (token) {
+            fetchUser();
+        } else {
+            setLoading(false);
+        }
+    }, [token]);
+
+    const fetchUser = async () => {
+        try {
+            const response = await api.get('/user');
+            setUser(response.data);
+        } catch (error) {
+            console.error('Error fetching user', error);
+            localStorage.removeItem('token');
+            setToken(null);
+            setUser(null);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const login = async (email, password) => {
+        try {
+            const response = await api.post('/login', { email, password });
+            const { access_token, user: userData } = response.data;
+            localStorage.setItem('token', access_token);
+            setToken(access_token);
+            setUser(userData);
+            return { success: true };
+        } catch (error) {
+            console.error('Login error', error);
+            return {
+                success: false,
+                message: error.response?.data?.message || 'Login failed. Please check your credentials.'
+            };
+        }
+    };
+
+    const loginWithToken = async (newToken) => {
+        try {
+            // First set the token so axios interceptor picks it up
+            localStorage.setItem('token', newToken);
+            setToken(newToken);
+
+            // Then fetch the user profile with the new token
+            const response = await api.get('/user', {
+                headers: { Authorization: `Bearer ${newToken}` }
+            });
+
+            setUser(response.data);
+            return true;
+        } catch (error) {
+            console.error('Error verifying token', error);
+            localStorage.removeItem('token');
+            setToken(null);
+            setUser(null);
+            return false;
+        }
+    };
+
+    const logout = async () => {
+        try {
+            await api.post('/logout');
+        } catch (error) {
+            console.error('Logout error', error);
+        } finally {
+            localStorage.removeItem('token');
+            setToken(null);
+            setUser(null);
+        }
+    };
+
+    return (
+        <AuthContext.Provider value={{ user, token, loading, login, loginWithToken, logout }}>
+            {children}
+        </AuthContext.Provider>
+    );
+};
+
+export const useAuth = () => {
+    return useContext(AuthContext);
+};
