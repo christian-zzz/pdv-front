@@ -9,9 +9,11 @@ import Vuelos from './pages/admin/Vuelos';
 import Hoteles from './pages/admin/Hoteles';
 import Blog from './pages/admin/Blog';
 import Consultas from './pages/admin/Consultas';
+import Asesores from './pages/admin/Asesores';
+import Usuarios from './pages/admin/Usuarios';
 import Login from './pages/Login';
-import OAuthCallback from './pages/OAuthCallback';
 import ProtectedRoute from './components/common/ProtectedRoute';
+import RoleRoute from './components/common/RoleRoute';
 
 const router = createBrowserRouter([
     {
@@ -31,10 +33,6 @@ const router = createBrowserRouter([
                 path: 'login',
                 element: <Login />,
             },
-            {
-                path: 'auth/callback',
-                element: <OAuthCallback />,
-            },
         ],
     },
     {
@@ -46,15 +44,38 @@ const router = createBrowserRouter([
         ),
         children: [
             { index: true, element: <Dashboard /> },
-            { path: 'paquetes', element: <Paquetes /> },
-            { path: 'vuelos', element: <Vuelos /> },
-            { path: 'hoteles', element: <Hoteles /> },
-            { path: 'blog', element: <Blog /> },
-            { path: 'consultas', element: <Consultas /> },
+            {
+                path: 'paquetes',
+                element: <RoleRoute allowedRoles={[1, 2]}><Paquetes /></RoleRoute>
+            },
+            {
+                path: 'vuelos',
+                element: <RoleRoute allowedRoles={[1, 2]}><Vuelos /></RoleRoute>
+            },
+            {
+                path: 'hoteles',
+                element: <RoleRoute allowedRoles={[1, 2]}><Hoteles /></RoleRoute>
+            },
+            {
+                path: 'blog',
+                element: <RoleRoute allowedRoles={[1, 2]}><Blog /></RoleRoute>
+            },
+            {
+                path: 'consultas',
+                element: <RoleRoute allowedRoles={[1, 3]}><Consultas /></RoleRoute>
+            },
+            {
+                path: 'asesores',
+                element: <RoleRoute allowedRoles={[1, 3]}><Asesores /></RoleRoute>
+            },
+            {
+                path: 'usuarios',
+                element: <RoleRoute allowedRoles={[1]}><Usuarios /></RoleRoute>
+            },
             // Editar Página sub-routes:
-            // { path: 'informacion',  element: <Informacion /> },
-            // { path: 'imagenes',     element: <Imagenes /> },
-            // { path: 'contenido',    element: <Contenido /> },
+            // { path: 'informacion',  element: <RoleRoute allowedRoles={[1, 2]}><Informacion /></RoleRoute> },
+            // { path: 'imagenes',     element: <RoleRoute allowedRoles={[1, 2]}><Imagenes /></RoleRoute> },
+            // { path: 'contenido',    element: <RoleRoute allowedRoles={[1, 2]}><Contenido /></RoleRoute> },
         ],
     },
 ]);

@@ -19,7 +19,11 @@ export const AuthProvider = ({ children }) => {
     const fetchUser = async () => {
         try {
             const response = await api.get('/user');
-            setUser(response.data);
+            const userData = response.data;
+            if (userData && userData.role) {
+                userData.role = parseInt(userData.role);
+            }
+            setUser(userData);
         } catch (error) {
             console.error('Error fetching user', error);
             localStorage.removeItem('token');
@@ -34,6 +38,11 @@ export const AuthProvider = ({ children }) => {
         try {
             const response = await api.post('/login', { email, password });
             const { access_token, user: userData } = response.data;
+
+            if (userData && userData.role) {
+                userData.role = parseInt(userData.role);
+            }
+
             localStorage.setItem('token', access_token);
             setToken(access_token);
             setUser(userData);
@@ -44,28 +53,6 @@ export const AuthProvider = ({ children }) => {
                 success: false,
                 message: error.response?.data?.message || 'Login failed. Please check your credentials.'
             };
-        }
-    };
-
-    const loginWithToken = async (newToken) => {
-        try {
-            // First set the token so axios interceptor picks it up
-            localStorage.setItem('token', newToken);
-            setToken(newToken);
-
-            // Then fetch the user profile with the new token
-            const response = await api.get('/user', {
-                headers: { Authorization: `Bearer ${newToken}` }
-            });
-
-            setUser(response.data);
-            return true;
-        } catch (error) {
-            console.error('Error verifying token', error);
-            localStorage.removeItem('token');
-            setToken(null);
-            setUser(null);
-            return false;
         }
     };
 
@@ -82,7 +69,7 @@ export const AuthProvider = ({ children }) => {
     };
 
     return (
-        <AuthContext.Provider value={{ user, token, loading, login, loginWithToken, logout }}>
+        <AuthContext.Provider value={{ user, token, loading, login, logout }}>
             {children}
         </AuthContext.Provider>
     );

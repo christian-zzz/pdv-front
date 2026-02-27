@@ -1,112 +1,188 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import AdminTable from '../../components/dashboard/AdminTable';
 import FormCard, { FormSelect } from '../../components/dashboard/FormCard';
+import api from '../../api/axios';
 
 const Badge = ({ label }) => {
-    const colors = {
-        'Pendiente': 'bg-yellow-400 text-yellow-900',
-        'Respondida': 'bg-green-500 text-white',
-        'Archivada': 'bg-gray-400 text-white',
+    const statusMap = {
+        'pending': { text: 'Pendiente', classes: 'bg-yellow-400 text-yellow-900' },
+        'en contacto': { text: 'En Contacto', classes: 'bg-green-500 text-white' },
     };
+
+    // Default fallback
+    const config = statusMap[label] || { text: label, classes: 'bg-gray-300 text-gray-700' };
+
     return (
-        <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold ${colors[label] ?? 'bg-gray-300 text-gray-700'}`}>
-            {label}
+        <span className={`inline-block px-2.5 py-0.5 rounded-full text-[10px] font-bold ${config.classes}`}>
+            {config.text}
         </span>
     );
 };
 
-const DATA = [
-    { id: 1, nombre: 'María López', email: 'maria@mail.com', telefono: '+58 412-111-2233', asunto: 'Consulta sobre paquetes', fecha: '30/01/26 9:00AM', estado: 'Pendiente' },
-    { id: 2, nombre: 'Carlos Pérez', email: 'carlos@mail.com', telefono: '+58 414-222-3344', asunto: 'Disponibilidad vuelos Cancún', fecha: '30/01/26 10:30AM', estado: 'Respondida' },
-    { id: 3, nombre: 'Ana García', email: 'ana@mail.com', telefono: '+58 416-333-4455', asunto: 'Precio hotel Margarita', fecha: '31/01/26 11:00AM', estado: 'Pendiente' },
-    { id: 4, nombre: 'Luis Martínez', email: 'luis@mail.com', telefono: '+58 424-444-5566', asunto: 'Paquetes familiares', fecha: '31/01/26 2:00PM', estado: 'Respondida' },
-    { id: 5, nombre: 'Sofía Rodríguez', email: 'sofia@mail.com', telefono: '+58 426-555-6677', asunto: 'Fechas disponibles Canaima', fecha: '01/02/26 8:30AM', estado: 'Pendiente' },
-    { id: 6, nombre: 'José Hernández', email: 'jose@mail.com', telefono: '+58 412-666-7788', asunto: 'Modificar reserva', fecha: '01/02/26 3:15PM', estado: 'Archivada' },
-    { id: 7, nombre: 'Laura Sánchez', email: 'laura@mail.com', telefono: '+58 414-777-8899', asunto: 'Vuelos nacionales disponibles', fecha: '02/02/26 9:00AM', estado: 'Pendiente' },
-    { id: 8, nombre: 'Pedro Gómez', email: 'pedro@mail.com', telefono: '+58 416-888-9900', asunto: 'Paquete todo incluido', fecha: '02/02/26 4:45PM', estado: 'Respondida' },
-];
-
+// Column definition for AdminTable
 const COLUMNS = [
-    { key: 'nombre', label: 'Nombre' },
-    { key: 'email', label: 'Email' },
-    { key: 'telefono', label: 'Teléfono' },
-    { key: 'asunto', label: 'Asunto' },
-    { key: 'fecha', label: 'Fecha' },
-    { key: 'estado', label: 'Estado', render: (v) => <Badge label={v} /> },
+    { key: 'client_name', label: 'Cliente' },
+    { key: 'client_email', label: 'Email' },
+    { key: 'from_date', label: 'Llegada', render: (v) => v ? new Date(v).toLocaleDateString() : 'N/A' },
+    { key: 'consultant_name', label: 'Asesor', render: (v) => v ? v : <span className="text-gray-400 text-xs italic">No asignado</span> },
+    { key: 'assigned_at', label: 'Fecha Asignado', render: (v) => v ? new Date(v).toLocaleDateString() : '-' },
+    { key: 'assignment_status', label: 'Estado', render: (v) => <Badge label={v} /> },
 ];
 
-// ── Respond / update form ─────────────────────────────────────────────────────
-const ConsultaForm = () => {
-    const [form, setForm] = useState({ nombre: '', email: '', asunto: '', respuesta: '', estado: '' });
-    const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+const Consultas = () => {
+    const [inquiries, setInquiries] = useState([]);
+    const [consultants, setConsultants] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [selectedInquiry, setSelectedInquiry] = useState(null);
+    const [selectedConsultantId, setSelectedConsultantId] = useState('');
+    const [submitting, setSubmitting] = useState(false);
+    const [message, setMessage] = useState('');
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    const fetchData = async () => {
+        setLoading(true);
+        try {
+            const [inquiriesRes, consultantsRes] = await Promise.all([
+                api.get('/consultas'),
+                api.get('/consultants')
+            ]);
+
+            // Format data for the table
+            const formattedInquiries = inquiriesRes.data.map(inq => ({
+                ...inq,
+                id: inq.inquiries_ID, // AdminTable requires 'id' implicitly usually, but we pass real obj
+                consultant_name: inq.consultant ? inq.consultant.name : null,
+            }));
+
+            setInquiries(formattedInquiries);
+            setConsultants(consultantsRes.data);
+        } catch (error) {
+            console.error('Error fetching data for Consultas page:', error);
+            setMessage('Error al cargar la información. Refresque la página.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleAssign = async (e) => {
+        e.preventDefault();
+        if (!selectedInquiry || !selectedConsultantId) return;
+
+        setSubmitting(true);
+        try {
+            await api.post(`/consultas/${selectedInquiry.inquiries_ID}/assign`, {
+                consultant_id: selectedConsultantId
+            });
+
+            setMessage('Asesor asignado exitosamente.');
+            setSelectedInquiry(null); // Close the assignment interface
+            fetchData(); // Refresh the list
+
+            // Prompt the user to redirect to Whatsapp
+            const selectedConsultant = consultants.find(c => c.id.toString() === selectedConsultantId.toString());
+            if (selectedConsultant && selectedConsultant.phone) {
+                const phoneFormated = selectedConsultant.phone.replace(/[^0-9]/g, '');
+                const url = `https://wa.me/${phoneFormated}?text=Hola,%20tienes%20una%20nueva%20consulta%20asignada:%20Cliente%20${selectedInquiry.client_name}`;
+                window.open(url, '_blank');
+            }
+
+        } catch (error) {
+            console.error('Error assigning consultant:', error);
+            setMessage('Ocurrió un error al intentar asignar la consulta.');
+        } finally {
+            setSubmitting(false);
+        }
+    };
 
     return (
-        <FormCard
-            title="Responder Consulta"
-            onSubmit={(e) => { e.preventDefault(); console.log(form); alert('Respuesta enviada'); }}
-            submitLabel="Enviar Respuesta"
-        >
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                {/* Read-only info fields */}
-                <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-[#001f6c]">Cliente</label>
-                    <input readOnly placeholder="Nombre del cliente…"
-                        className="w-full rounded-lg border border-[#ed6f00]/30 bg-[#f4f7fb] px-3 py-2 text-sm text-[#001f6c] placeholder-gray-400 cursor-not-allowed"
-                        value={form.nombre} onChange={set('nombre')}
-                    />
-                </div>
-                <div className="flex flex-col gap-1">
-                    <label className="text-xs font-semibold text-[#001f6c]">Email</label>
-                    <input readOnly placeholder="Email del cliente…"
-                        className="w-full rounded-lg border border-[#ed6f00]/30 bg-[#f4f7fb] px-3 py-2 text-sm text-[#001f6c] placeholder-gray-400 cursor-not-allowed"
-                        value={form.email} onChange={set('email')}
-                    />
-                </div>
-                <div className="flex flex-col gap-1 sm:col-span-2">
-                    <label className="text-xs font-semibold text-[#001f6c]">Asunto</label>
-                    <input readOnly placeholder="Asunto de la consulta…"
-                        className="w-full rounded-lg border border-[#ed6f00]/30 bg-[#f4f7fb] px-3 py-2 text-sm text-[#001f6c] placeholder-gray-400 cursor-not-allowed"
-                        value={form.asunto} onChange={set('asunto')}
-                    />
+        <div className="p-6 space-y-8 max-w-7xl mx-auto">
+
+            <div className="flex items-center justify-between">
+                <div>
+                    <h1 className="text-2xl font-bold text-[#001f6c]">Buzón de Consultas</h1>
+                    <p className="text-sm text-gray-500 mt-1">Supervisa las consultas y asígnalas a los asesores de ventas.</p>
                 </div>
             </div>
 
-            <div className="flex flex-col gap-1">
-                <label htmlFor="cs-respuesta" className="text-xs font-semibold text-[#001f6c]">Respuesta</label>
-                <textarea
-                    id="cs-respuesta"
-                    rows={6}
-                    placeholder="Escribe tu respuesta aquí…"
-                    className="w-full rounded-lg border border-[#ed6f00]/50 bg-white px-3 py-2 text-sm text-[#001f6c] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ed6f00]/40 transition resize-y"
-                    value={form.respuesta}
-                    onChange={set('respuesta')}
+            {message && (
+                <div className="p-4 rounded-xl text-sm font-medium bg-blue-50 text-blue-700 border border-blue-200">
+                    {message}
+                </div>
+            )}
+
+            {loading ? (
+                <div className="flex justify-center p-10">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#ed6f00]"></div>
+                </div>
+            ) : (
+                <AdminTable
+                    title="Listado de Consultas"
+                    columns={COLUMNS}
+                    data={inquiries}
+                    pageSize={10}
+                    onView={(row) => setSelectedInquiry(row)}
                 />
-            </div>
+            )}
 
-            <FormSelect label="Actualizar Estado" id="cs-estado"
-                options={['Pendiente', 'Respondida', 'Archivada']}
-                value={form.estado} onChange={set('estado')}
-            />
-        </FormCard>
+            {/* Assignment Form Section (Displays when a row is clicked) */}
+            {selectedInquiry && (
+                <div id="assignment-form" className="mt-8">
+                    <FormCard
+                        title={`Asignar Consulta: #${selectedInquiry.inquiries_ID}`}
+                        onSubmit={handleAssign}
+                        submitLabel={submitting ? "Asignando..." : "Asignar y Notificar"}
+                    >
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+                            <div className="p-4 bg-gray-50 border border-gray-100 rounded-xl space-y-2">
+                                <h3 className="text-xs font-bold uppercase text-gray-400 tracking-wider">Datos del Cliente</h3>
+                                <p className="text-sm"><strong>Nombre:</strong> {selectedInquiry.client_name}</p>
+                                <p className="text-sm"><strong>Email:</strong> {selectedInquiry.client_email}</p>
+                                <p className="text-sm"><strong>Teléfono:</strong> {selectedInquiry.client_phone || 'N/A'}</p>
+                            </div>
+
+                            <div className="p-4 bg-gray-50 border border-gray-100 rounded-xl space-y-2">
+                                <h3 className="text-xs font-bold uppercase text-gray-400 tracking-wider">Detalles de Viaje</h3>
+                                <p className="text-sm"><strong>Llegada:</strong> {selectedInquiry.from_date ? new Date(selectedInquiry.from_date).toLocaleDateString() : 'N/A'}</p>
+                                <p className="text-sm"><strong>Salida:</strong> {selectedInquiry.to_date ? new Date(selectedInquiry.to_date).toLocaleDateString() : 'N/A'}</p>
+                                <p className="text-sm"><strong>Niños:</strong> {selectedInquiry.kids ? 'Sí' : 'No'}</p>
+                            </div>
+                        </div>
+
+                        <div className="mb-4">
+                            <label className="block text-sm font-bold text-[#001f6c] mb-2">Seleccionar Asesor</label>
+                            <select
+                                required
+                                value={selectedConsultantId}
+                                onChange={(e) => setSelectedConsultantId(e.target.value)}
+                                className="w-full px-4 py-3 border border-gray-200 rounded-xl bg-white focus:ring-2 focus:ring-[#ed6f00] outline-none"
+                            >
+                                <option value="" disabled>-- Elige un asesor --</option>
+                                {consultants.map(c => (
+                                    <option key={c.id} value={c.id}>{c.name} ({c.phone})</option>
+                                ))}
+                            </select>
+                        </div>
+                        <p className="text-xs text-gray-500">
+                            Al asignar, el estado cambiará a "En Contacto" y se abrirá una ventana de WhatsApp para enviar el mensaje directamente al asesor seleccionado.
+                        </p>
+
+                        <div className="mt-4 flex justify-end">
+                            <button
+                                type="button"
+                                onClick={() => setSelectedInquiry(null)}
+                                className="mr-3 px-4 py-2 border border-gray-300 text-gray-700 rounded-xl hover:bg-gray-50 transition"
+                            >
+                                Cancelar
+                            </button>
+                        </div>
+                    </FormCard>
+                </div>
+            )}
+        </div>
     );
 };
-
-const Consultas = () => (
-    <div className="p-6 space-y-8">
-        <AdminTable
-            title="Consultas"
-            columns={COLUMNS}
-            data={DATA}
-            pageSize={5}
-            onView={(row) => alert(`Ver consulta de: ${row.nombre}`)}
-            onEdit={(row) => {
-                alert(`Respondiendo a: ${row.nombre}`);
-                document.getElementById('form-consulta')?.scrollIntoView({ behavior: 'smooth' });
-            }}
-            onArchive={(row) => alert(`Archivar consulta de: ${row.nombre}`)}
-        />
-        <div id="form-consulta"><ConsultaForm /></div>
-    </div>
-);
 
 export default Consultas;
