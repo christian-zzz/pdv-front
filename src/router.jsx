@@ -11,6 +11,7 @@ import Blog from './pages/admin/Blog';
 import Consultas from './pages/admin/Consultas';
 import Asesores from './pages/admin/Asesores';
 import Usuarios from './pages/admin/Usuarios';
+import WhatsappSettings from './pages/admin/WhatsappSettings';
 import Login from './pages/Login';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import RoleRoute from './components/common/RoleRoute';
@@ -71,6 +72,10 @@ const router = createBrowserRouter([
             {
                 path: 'usuarios',
                 element: <RoleRoute allowedRoles={[1]}><Usuarios /></RoleRoute>
+            },
+            {
+                path: 'whatsapp',
+                element: <RoleRoute allowedRoles={[1, 3]}><WhatsappSettings /></RoleRoute>
             },
             // Editar Página sub-routes:
             // { path: 'informacion',  element: <RoleRoute allowedRoles={[1, 2]}><Informacion /></RoleRoute> },

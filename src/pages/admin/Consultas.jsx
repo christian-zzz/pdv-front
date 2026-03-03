@@ -6,6 +6,7 @@ import api from '../../api/axios';
 const Badge = ({ label }) => {
     const statusMap = {
         'pending': { text: 'Pendiente', classes: 'bg-yellow-400 text-yellow-900' },
+        'esperando respuesta': { text: 'Esperando Respuesta', classes: 'bg-blue-500 text-white' },
         'en contacto': { text: 'En Contacto', classes: 'bg-green-500 text-white' },
     };
 
@@ -77,17 +78,9 @@ const Consultas = () => {
                 consultant_id: selectedConsultantId
             });
 
-            setMessage('Asesor asignado exitosamente.');
+            setMessage('Se le ha enviado un mensaje al asesor. Esperando respuesta...');
             setSelectedInquiry(null); // Close the assignment interface
             fetchData(); // Refresh the list
-
-            // Prompt the user to redirect to Whatsapp
-            const selectedConsultant = consultants.find(c => c.id.toString() === selectedConsultantId.toString());
-            if (selectedConsultant && selectedConsultant.phone) {
-                const phoneFormated = selectedConsultant.phone.replace(/[^0-9]/g, '');
-                const url = `https://wa.me/${phoneFormated}?text=Hola,%20tienes%20una%20nueva%20consulta%20asignada:%20Cliente%20${selectedInquiry.client_name}`;
-                window.open(url, '_blank');
-            }
 
         } catch (error) {
             console.error('Error assigning consultant:', error);
@@ -166,7 +159,7 @@ const Consultas = () => {
                             </select>
                         </div>
                         <p className="text-xs text-gray-500">
-                            Al asignar, el estado cambiará a "En Contacto" y se abrirá una ventana de WhatsApp para enviar el mensaje directamente al asesor seleccionado.
+                            Al asignar, el sistema enviará automáticamente un mensaje de WhatsApp al asesor seleccionado. El estado quedará como "Esperando Respuesta" hasta que el asesor acepte (1) o rechace (2).
                         </p>
 
                         <div className="mt-4 flex justify-end">
