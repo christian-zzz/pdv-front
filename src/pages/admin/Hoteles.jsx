@@ -1,63 +1,124 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import api from '../../api/axios';
 import AdminTable from '../../components/dashboard/AdminTable';
-import FormCard, { FormInput, FormSelect, FormTextarea, FormCheckbox, ImageSlot } from '../../components/dashboard/FormCard';
+import FormCard, { FormInput, FormSelect, FormMultiSelect, FormDynamicList, FormPlaceSearch, FormTextarea, FormCheckbox, ImageSlot } from '../../components/dashboard/FormCard';
 
-const Thumb = ({ color = '#001f6c', initials = '' }) => (
+const Thumb = ({ image, initials = '' }) => (
     <div className="flex items-center justify-center">
         <div className="w-16 h-12 rounded-lg flex items-center justify-center text-white text-[10px] font-bold leading-tight text-center"
-            style={{ background: `linear-gradient(135deg, ${color}, ${color}cc)` }}>
-            {initials}
+            style={{ background: `linear-gradient(135deg, #001f6c, #001f6ccc)` }}>
+            {image ? <img src={image} alt="Thumbnail" className="w-full h-full object-cover rounded-lg" /> : initials}
         </div>
     </div>
 );
 
-const DATA = [
-    { id: 1, thumb: { color: '#1565c0', initials: 'Hotel\nSol' }, nombre: 'Hotel Sol Caribe', ubicacion: 'Margarita', categoria: '4 ★', precio: '$120/noche', habitaciones: 45, consultas: 30, editado: '30/01/26 8:00AM' },
-    { id: 2, thumb: { color: '#00695c', initials: 'Hotel\nPlaya' }, nombre: 'Hotel Playa Mar', ubicacion: 'Margarita', categoria: '5 ★', precio: '$220/noche', habitaciones: 80, consultas: 25, editado: '30/01/26 9:00AM' },
-    { id: 3, thumb: { color: '#7b1fa2', initials: 'Hotel\nVista' }, nombre: 'Hotel Vista al Mar', ubicacion: 'Los Roques', categoria: '4 ★', precio: '$180/noche', habitaciones: 32, consultas: 18, editado: '31/01/26 10:00AM' },
-    { id: 4, thumb: { color: '#e65100', initials: 'Pos.\nCol.' }, nombre: 'Posada Colonial', ubicacion: 'Mérida', categoria: '3 ★', precio: '$65/noche', habitaciones: 20, consultas: 10, editado: '01/02/26 11:00AM' },
-    { id: 5, thumb: { color: '#2e7d32', initials: 'Hotel\nTrop.' }, nombre: 'Hotel Tropical Suites', ubicacion: 'Barquisimeto', categoria: '4 ★', precio: '$95/noche', habitaciones: 60, consultas: 14, editado: '02/02/26 12:00PM' },
-    { id: 6, thumb: { color: '#c62828', initials: 'Hotel\nPrem.' }, nombre: 'Hotel Premium Caracas', ubicacion: 'Caracas', categoria: '5 ★', precio: '$300/noche', habitaciones: 120, consultas: 22, editado: '03/02/26 1:00PM' },
-];
+// DATA array is removed as per the instruction's implied new data structure and API usage.
+// If mock data is still needed, it should be provided in the new format.
 
 const COLUMNS = [
-    { key: 'thumb', label: 'Portada', render: (v) => <Thumb color={v.color} initials={v.initials} /> },
-    { key: 'nombre', label: 'Nombre' },
-    { key: 'ubicacion', label: 'Ubicación' },
-    { key: 'categoria', label: 'Categoría' },
-    { key: 'precio', label: 'Precio' },
-    { key: 'habitaciones', label: 'Habitaciones' },
-    { key: 'consultas', label: 'Consultas' },
-    { key: 'editado', label: 'Editado' },
+    { key: 'thumb', label: 'Portada', render: (v, item) => <Thumb image={item.post?.thumbnail || item.post?.banner} initials="HT" /> },
+    { key: 'post.name', label: 'Nombre' },
+    { key: 'destination', label: 'Ubicación' },
+    { key: 'stars', label: 'Categoría', render: (v) => `${v} ★` },
+    { key: 'starting_price', label: 'Precio ($)' },
+    { key: 'roomTypes', label: 'Habitaciones', render: (v, item) => item.roomTypes?.map(r => r.type).join(', ') || 'N/A' },
+    { key: 'isActive', label: 'Activo', render: (v) => v ? 'Sí' : 'No' },
 ];
 
-const HotelForm = () => {
-    const [form, setForm] = useState({
-        nombre: '', ubicacion: '', categoria: '', precioNoche: '',
-        habitaciones: '', descripcion: '', servicios: '', activo: false,
-    });
+const HotelForm = ({ lookups, onCreated }) => {
+    const defaultForm = {
+        name: '',
+        destination: '',
+        map_location: '',
+        stars: '',
+        starting_price: '',
+        board_type_FK: '',
+        room_types: [], // Now an array for many-to-many
+        overview: '',
+        information: '',
+        features: '',
+        banner: '',
+        thumbnail: '',
+        imagesString: '', // comma-separated
+        isActive: true,
+    };
+    const [form, setForm] = useState(defaultForm);
+
     const set = (k) => (e) =>
         setForm((f) => ({ ...f, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }));
 
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        try {
+            const response = await api.post('/accommodations', form);
+            alert('Alojamiento creado exitosamente!');
+            setForm(defaultForm);
+            if (onCreated) onCreated();
+        } catch (error) {
+            console.error('Error creating accommodation:', error);
+            alert('Error al crear el alojamiento.');
+        }
+    };
+
+    const handleCreateRoomType = async (newType) => {
+        try {
+            const res = await api.post('/lookups/room-types', { type: newType });
+            // Let the parent re-fetch lookups, or we can Optimistically update
+            if (onCreated) onCreated();
+            // Also select it immediately
+            setForm(f => ({ ...f, room_types: [...f.room_types, res.data.room_type_ID] }));
+        } catch (err) {
+            console.error('Error creating room type', err);
+            alert('Error al crear tipo de habitación.');
+        }
+    };
+
     return (
-        <FormCard title="Crear un Nuevo Hotel" onSubmit={(e) => { e.preventDefault(); console.log(form); alert('Hotel creado'); }} submitLabel="Crear Hotel">
+        <FormCard title="Crear un Nuevo Hotel" onSubmit={handleSubmit} submitLabel="Crear Hotel">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div className="space-y-4">
-                    <FormInput label="Nombre del Hotel" id="ht-nombre" value={form.nombre} onChange={set('nombre')} />
-                    <FormInput label="Ubicación / Ciudad" id="ht-ubicacion" value={form.ubicacion} onChange={set('ubicacion')} />
+                    <FormInput label="Nombre del Hotel" id="ht-nombre" value={form.name} onChange={set('name')} required />
+                    <FormInput label="Ubicación / Ciudad" id="ht-ubicacion" value={form.destination} onChange={set('destination')} required />
                     <div className="grid grid-cols-2 gap-3">
                         <FormSelect label="Categoría (★)" id="ht-categoria"
-                            options={['1 ★', '2 ★', '3 ★', '4 ★', '5 ★']}
-                            value={form.categoria} onChange={set('categoria')}
+                            options={[
+                                { value: '1', label: '1 ★' },
+                                { value: '2', label: '2 ★' },
+                                { value: '3', label: '3 ★' },
+                                { value: '4', label: '4 ★' },
+                                { value: '5', label: '5 ★' }
+                            ]}
+                            value={form.stars} onChange={set('stars')} required
                         />
-                        <FormInput label="Precio / Noche ($)" id="ht-precio" type="number" min="0" step="0.01"
-                            value={form.precioNoche} onChange={set('precioNoche')}
+                        <FormInput label="Precio / Noche ($)" id="ht-precio" type="number" min="0" step="0.01" value={form.starting_price} onChange={set('starting_price')} required />
+                    </div>
+
+                    <div className="mt-3">
+                        <FormPlaceSearch
+                            label="Ubicación Maps (Ej. Hesperia Isla Margarita)"
+                            id="ht-map_location"
+                            value={form.map_location}
+                            onChange={set('map_location')}
+                            category="hotel"
                         />
                     </div>
-                    <FormInput label="N° de Habitaciones" id="ht-habitaciones" type="number" min="1"
-                        value={form.habitaciones} onChange={set('habitaciones')}
+
+                    <div className="mt-3">
+                        <FormSelect label="Régimen (Opcional)" id="ht-board"
+                            options={lookups.boardTypes.map(b => ({ value: b.board_type_ID, label: b.type }))}
+                            value={form.board_type_FK} onChange={set('board_type_FK')}
+                        />
+                    </div>
+
+                    <FormMultiSelect
+                        label="Tipos de Habitación (Múltiple)" id="ht-room"
+                        options={lookups.roomTypes.map(r => ({ value: r.room_type_ID, label: r.type }))}
+                        value={form.room_types}
+                        onChange={(selectedArray) => setForm(f => ({ ...f, room_types: selectedArray }))}
+                        onCreateOption={handleCreateRoomType}
                     />
                 </div>
+
                 <div className="space-y-4">
                     <div>
                         <p className="text-xs font-semibold text-[#001f6c] mb-2">Banner del Hotel</p>
@@ -80,30 +141,86 @@ const HotelForm = () => {
                     </div>
                 </div>
             </div>
-            <FormTextarea label="Descripción del Hotel" id="ht-desc" rows={4} value={form.descripcion} onChange={set('descripcion')} />
-            <FormTextarea label="Servicios y Amenidades" id="ht-servicios" rows={4} value={form.servicios} onChange={set('servicios')} />
+
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
+                <div className="space-y-4">
+                    <FormTextarea label="Descripción del Hotel (Overview)" id="ht-desc" rows={4} value={form.overview} onChange={set('overview')} />
+                    <FormTextarea label="Información Completa" id="ht-info" rows={4} value={form.information} onChange={set('information')} />
+                </div>
+                <div>
+                    <FormDynamicList
+                        label="Servicios y Amenidades"
+                        id="ht-servicios"
+                        value={form.features}
+                        onChange={(val) => setForm(f => ({ ...f, features: val }))}
+                        placeholder="Ej: Wi-Fi Gratis, Piscina, Desayuno..."
+                    />
+                </div>
+            </div>
             <div className="flex gap-6">
-                <FormCheckbox label="Hotel Activo" id="ht-activo" checked={form.activo} onChange={set('activo')} />
+                <FormCheckbox label="Hotel Activo" id="ht-activo" checked={form.isActive} onChange={set('isActive')} />
             </div>
         </FormCard>
     );
 };
 
-const Hoteles = () => (
-    <div className="p-6 space-y-8">
-        <AdminTable
-            title="Hoteles"
-            newLabel="+ Nuevo Hotel"
-            columns={COLUMNS}
-            data={DATA}
-            pageSize={5}
-            onNew={() => document.getElementById('form-hotel')?.scrollIntoView({ behavior: 'smooth' })}
-            onView={(row) => alert(`Ver: ${row.nombre}`)}
-            onEdit={(row) => alert(`Editar: ${row.nombre}`)}
-            onArchive={(row) => alert(`Archivar: ${row.nombre}`)}
-        />
-        <div id="form-hotel"><HotelForm /></div>
-    </div>
-);
+const Hoteles = () => {
+    const [accommodations, setAccommodations] = useState([]);
+    const [lookups, setLookups] = useState({ guestTypes: [], boardTypes: [], roomTypes: [] });
+    const [loading, setLoading] = useState(true);
+
+    const fetchData = async () => {
+        try {
+            setLoading(true);
+            const [accRes, lookupsRes] = await Promise.all([
+                api.get('/accommodations'),
+                api.get('/lookups')
+            ]);
+
+            const flatAccs = accRes.data.map(acc => ({
+                ...acc,
+                'post.name': acc.post?.name,
+                'board_type.name': acc.boardType?.type,
+            }));
+
+            setAccommodations(flatAccs);
+
+            setLookups({
+                guestTypes: lookupsRes.data.guest_types || [],
+                boardTypes: lookupsRes.data.board_types || [],
+                roomTypes: lookupsRes.data.room_types || []
+            });
+        } catch (err) {
+            console.error('Error fetching accommodations:', err);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchData();
+    }, []);
+
+    return (
+        <div className="p-6 space-y-8 animate-in fade-in duration-300">
+            {loading ? (
+                <div className="flex justify-center p-10"><div className="animate-spin h-8 w-8 border-b-2 border-[#ed6f00] rounded-full"></div></div>
+            ) : (
+                <AdminTable
+                    title="Alojamientos API"
+                    newLabel="+ Nuevo Alojamiento"
+                    columns={COLUMNS}
+                    data={accommodations}
+                    pageSize={10}
+                    onNew={() => document.getElementById('form-hotel')?.scrollIntoView({ behavior: 'smooth' })}
+                    onView={(row) => alert(`Vista previa: ${row['post.name']}`)}
+                    onEdit={(row) => alert(`Editar funcionalidad en proceso: ${row['post.name']}`)}
+                    onArchive={(row) => alert(`Archivar funcionalidad en proceso: ${row['post.name']}`)}
+                />
+            )}
+            <div id="form-hotel"><HotelForm lookups={lookups} onCreated={fetchData} /></div>
+        </div>
+    );
+};
 
 export default Hoteles;
