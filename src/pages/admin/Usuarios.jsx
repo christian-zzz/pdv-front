@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../api/axios';
-import { Spinner } from '@phosphor-icons/react';
+import { SpinnerIcon } from '@phosphor-icons/react';
 
 const ROLE_NAMES = {
     1: 'Administrador',
@@ -81,7 +81,7 @@ const Usuarios = () => {
             )}
 
             {/* List of Users */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div id="tour-usuarios-table" className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-100 bg-gray-50">
                     <h2 className="text-lg font-bold text-[#001f6c]">Usuarios Existentes</h2>
                 </div>
@@ -133,7 +133,7 @@ const Usuarios = () => {
             </div>
 
             {/* Create User Form */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div id="tour-usuarios-form" className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-100 bg-gray-50">
                     <h2 className="text-lg font-bold text-[#001f6c]">Crear Nuevo Usuario</h2>
                 </div>
@@ -204,7 +204,7 @@ const Usuarios = () => {
                             >
                                 {submitting ? (
                                     <>
-                                        <Spinner className="animate-spin h-5 w-5 text-white" />
+                                        <SpinnerIcon className="animate-spin h-5 w-5 text-white" />
                                         Creando usuario...
                                     </>
                                 ) : (

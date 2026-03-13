@@ -77,17 +77,19 @@ const BlogForm = () => {
 
 const Blog = () => (
     <div className="p-6 space-y-8">
-        <AdminTable
-            title="Blog"
-            newLabel="+ Nuevo Post"
-            columns={COLUMNS}
-            data={DATA}
-            pageSize={5}
-            onNew={() => document.getElementById('form-blog')?.scrollIntoView({ behavior: 'smooth' })}
-            onView={(row) => alert(`Ver: ${row.titulo}`)}
-            onEdit={(row) => alert(`Editar: ${row.titulo}`)}
-            onArchive={(row) => alert(`Archivar: ${row.titulo}`)}
-        />
+        <div id="tour-blog-table">
+            <AdminTable
+                title="Blog"
+                newLabel="Nuevo Post"
+                columns={COLUMNS}
+                data={DATA}
+                pageSize={5}
+                onNew={() => document.getElementById('form-blog')?.scrollIntoView({ behavior: 'smooth' })}
+                onView={(row) => alert(`Ver: ${row.titulo}`)}
+                onEdit={(row) => alert(`Editar: ${row.titulo}`)}
+                onArchive={(row) => alert(`Archivar: ${row.titulo}`)}
+            />
+        </div>
         <div id="form-blog"><BlogForm /></div>
     </div>
 );

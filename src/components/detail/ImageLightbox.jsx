@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, CaretLeft, CaretRight } from '@phosphor-icons/react';
+import { XIcon, CaretLeftIcon, CaretRightIcon } from '@phosphor-icons/react';
 
 /**
  * ImageLightbox — full-screen modal gallery.
@@ -28,7 +28,7 @@ const ImageLightbox = ({ images = [], startAt = 0, onClose }) => {
                 aria-label="Cerrar"
                 className="absolute top-4 right-4 z-10 rounded-full bg-white/20 p-2 text-white hover:bg-white/40 transition-colors"
             >
-                <X className="h-6 w-6"  />
+                <XIcon className="h-6 w-6"  />
             </button>
 
             {/* Prev arrow */}
@@ -38,7 +38,7 @@ const ImageLightbox = ({ images = [], startAt = 0, onClose }) => {
                 aria-label="Anterior"
                 className="absolute left-4 z-10 rounded-full bg-white/20 p-2.5 text-white hover:bg-white/40 transition-colors"
             >
-                <CaretLeft className="h-6 w-6"  />
+                <CaretLeftIcon className="h-6 w-6"  />
             </button>
 
             {/* Image */}
@@ -60,7 +60,7 @@ const ImageLightbox = ({ images = [], startAt = 0, onClose }) => {
                 aria-label="Siguiente"
                 className="absolute right-4 z-10 rounded-full bg-white/20 p-2.5 text-white hover:bg-white/40 transition-colors"
             >
-                <CaretRight className="h-6 w-6"  />
+                <CaretRightIcon className="h-6 w-6"  />
             </button>
 
             {/* Counter */}

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import slider1 from '../../assets/slider1.webp';
 import slider2 from '../../assets/slider2.webp';
-import { MagnifyingGlass } from '@phosphor-icons/react';
+import { MagnifyingGlassIcon } from '@phosphor-icons/react';
 
 const HeroSlider = () => {
     const images = [slider1, slider2];
@@ -44,7 +44,7 @@ const HeroSlider = () => {
                             className="w-full h-10 sm:h-11 pl-4 sm:pl-6 pr-10 text-[#001f6c] placeholder-[#6c7eab] text-sm sm:text-base outline-none rounded-full font-medium bg-transparent"
                         />
                         <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
-                            <MagnifyingGlass className="w-5 h-5 text-[#ed6f00]" />
+                            <MagnifyingGlassIcon className="w-5 h-5 text-[#ed6f00]" />
                         </div>
                     </div>
                 </div>

@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { Plus } from '@phosphor-icons/react';
+import { PlusIcon, CaretLeftIcon, CaretRightIcon, CaretUpIcon, CaretDownIcon, DotsThreeIcon } from '@phosphor-icons/react';
 
 /**
  * AdminTable — Generic reusable data table for admin modules.
@@ -17,7 +17,7 @@ import { Plus } from '@phosphor-icons/react';
  */
 const AdminTable = ({
     title,
-    newLabel = '+ Nuevo',
+    newLabel = 'Nuevo',
     columns = [],
     data = [],
     pageSize = 5,
@@ -82,7 +82,7 @@ const AdminTable = ({
                         onClick={onNew}
                         className="flex items-center gap-2 bg-[#001f6c] hover:bg-[#001f6c]/80 text-white text-sm font-semibold px-5 py-2.5 rounded-xl shadow transition-colors duration-200"
                     >
-                        <Plus className="w-4 h-4"  />
+                        <PlusIcon className="w-4 h-4"  />
                         {newLabel}
                     </button>
                 )}
@@ -103,9 +103,9 @@ const AdminTable = ({
                                         <div className="flex items-center justify-center gap-1">
                                             {col.label}
                                             {col.sortable && (
-                                                <span className="flex flex-col opacity-50 text-[8px] leading-[4px]">
-                                                    <span className={sortConfig.key === col.key && sortConfig.direction === 'asc' ? 'text-[#ed6f00] opacity-100' : ''}>▲</span>
-                                                    <span className={sortConfig.key === col.key && sortConfig.direction === 'desc' ? 'text-[#ed6f00] opacity-100' : ''}>▼</span>
+                                                <span className="flex flex-col opacity-50">
+                                                    <CaretUpIcon size={8} weight="bold" className={sortConfig.key === col.key && sortConfig.direction === 'asc' ? 'text-[#ed6f00] opacity-100' : ''} />
+                                                    <CaretDownIcon size={8} weight="bold" className={sortConfig.key === col.key && sortConfig.direction === 'desc' ? 'text-[#ed6f00] opacity-100' : ''} />
                                                 </span>
                                             )}
                                         </div>
@@ -192,13 +192,13 @@ const AdminTable = ({
                             disabled={page === 1}
                             className="w-7 h-7 flex items-center justify-center rounded-lg text-[#001f6c] font-bold text-sm hover:bg-[#001f6c]/10 disabled:opacity-30 transition-colors"
                         >
-                            ‹
+                            <CaretLeftIcon weight="bold" />
                         </button>
 
                         {pageNumbers().map((n, i) =>
                             n === '...' ? (
-                                <span key={`ellipsis-${i}`} className="w-7 h-7 flex items-center justify-center text-gray-400 text-sm">
-                                    …
+                                <span key={`ellipsis-${i}`} className="w-7 h-7 flex items-center justify-center text-gray-400">
+                                    <DotsThreeIcon />
                                 </span>
                             ) : (
                                 <button
@@ -219,7 +219,7 @@ const AdminTable = ({
                             disabled={page === totalPages}
                             className="w-7 h-7 flex items-center justify-center rounded-lg text-[#001f6c] font-bold text-sm hover:bg-[#001f6c]/10 disabled:opacity-30 transition-colors"
                         >
-                            ›
+                            <CaretRightIcon weight="bold" />
                         </button>
                     </div>
                 )}

@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import logo from '../../assets/logo.png';
-import { CaretDown, List, X } from '@phosphor-icons/react';
+import { CaretDownIcon, ListIcon, XIcon } from '@phosphor-icons/react';
 
 const NAV_LINKS_LEFT = [
     { to: '/', label: 'Inicio' },
@@ -61,7 +61,7 @@ const Header = () => {
                         <div className="group relative cursor-pointer">
                             <span className="flex items-center gap-1 hover:text-amber-600 transition-colors">
                                 Hoteles
-                                <CaretDown className="w-4 h-4"  />
+                                <CaretDownIcon className="w-4 h-4"  />
                             </span>
                             <div className="absolute top-full left-0 mt-2 w-48 bg-white text-gray-800 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                                 {HOTELES_SUBMENU.map(({ to, label }) => (
@@ -98,10 +98,10 @@ const Header = () => {
                     >
                         {menuOpen ? (
                             /* X icon */
-                            <X className="w-6 h-6"  />
+                            <XIcon className="w-6 h-6"  />
                         ) : (
                             /* Hamburger icon */
-                            <List className="w-6 h-6"  />
+                            <ListIcon className="w-6 h-6"  />
                         )}
                     </button>
                 </div>
@@ -132,7 +132,7 @@ const Header = () => {
                             className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-base font-medium hover:bg-[#001e6b]/8 hover:text-amber-600 transition-colors"
                         >
                             <span>Hoteles</span>
-                            <CaretDown
+                            <CaretDownIcon
                                 className={`w-4 h-4 transition-transform duration-200 ${hotelesOpen ? 'rotate-180' : ''}`}
                                 
                             />

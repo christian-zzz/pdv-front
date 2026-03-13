@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowUpRight } from '@phosphor-icons/react';
+import { ArrowUpRightIcon } from '@phosphor-icons/react';
 
 /**
  * TopListCard — Ranked list card.
@@ -26,7 +26,7 @@ const TopListCard = ({ title, items = [], to = '#' }) => {
 
             <div className="flex justify-end mt-4">
                 <Link to={to} className="text-[#001f6c]/40 hover:text-[#ed6f00] transition-colors">
-                    <ArrowUpRight className="w-6 h-6"  />
+                    <ArrowUpRightIcon className="w-6 h-6"  />
                 </Link>
             </div>
         </div>

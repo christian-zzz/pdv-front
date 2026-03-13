@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import CustomSelect from './CustomSelect';
-import { MagnifyingGlass } from '@phosphor-icons/react';
+import { MagnifyingGlassIcon } from '@phosphor-icons/react';
 
 // ── Styled date input ─────────────────────────────────────────────────────────
 const StyledDate = (props) => (
@@ -78,7 +78,7 @@ const FilterBar = () => {
                             aria-label="Buscar"
                             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-[#ed6f00] text-white shadow-md transition-all duration-200 hover:bg-[#d96200] hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ed6f00] focus-visible:ring-offset-2"
                         >
-                            <MagnifyingGlass className="h-5 w-5" />
+                            <MagnifyingGlassIcon className="h-5 w-5" />
                         </button>
                     </div>
                 </div>

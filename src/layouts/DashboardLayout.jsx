@@ -3,7 +3,7 @@ import { Outlet, Link } from 'react-router-dom';
 import Sidebar from '../components/dashboard/Sidebar';
 import logo from '../assets/logo.png';
 import { useAuth } from '../context/AuthContext';
-import { UserCircle } from '@phosphor-icons/react';
+import { UserCircleIcon } from '@phosphor-icons/react';
 
 const DashboardLayout = () => {
     const { user } = useAuth();
@@ -29,7 +29,7 @@ const DashboardLayout = () => {
                     {/* Admin avatar */}
                     <div className="flex items-center gap-3">
                         <div className="flex items-center gap-2 bg-[#ed6f00]/10 text-[#ed6f00] rounded-full px-4 py-1.5 text-sm font-semibold">
-                            <UserCircle className="w-5 h-5" />
+                            <UserCircleIcon className="w-5 h-5" />
                             {user?.name || 'Administrador'}
                         </div>
                     </div>

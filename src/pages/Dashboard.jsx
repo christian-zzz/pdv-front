@@ -41,7 +41,7 @@ const Dashboard = () => {
     return (
         <div className="p-6 space-y-6">
             {/* Page title */}
-            <div>
+            <div id="tour-dashboard-card">
                 <h1 className="text-2xl font-extrabold text-[#001f6c]">Dashboard</h1>
                 <p className="text-sm text-[#8898aa] mt-0.5">
                     Resumen general del sitio web
@@ -49,7 +49,7 @@ const Dashboard = () => {
             </div>
 
             {/* ── Row 1: All Stats (5 cards) ───────────────────────────── */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            <div id="tour-stats-row" className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
                 {STATS.map((s) => (
                     <StatsCard
                         key={s.label}
@@ -62,10 +62,12 @@ const Dashboard = () => {
             </div>
 
             {/* ── Row 2: Chart (full width, card height) ───────────────── */}
-            <ConsultasChart
-                data={CONSULTAS_WEEKLY}
-                to="/dashboard/consultas"
-            />
+            <div id="tour-consultas-chart">
+                <ConsultasChart
+                    data={CONSULTAS_WEEKLY}
+                    to="/dashboard/consultas"
+                />
+            </div>
 
             {/* ── Row 3: Top lists ─────────────────────────────────────── */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">

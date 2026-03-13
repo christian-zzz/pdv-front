@@ -1,24 +1,24 @@
 import React from 'react';
 import {
-    WifiHigh,
-    SwimmingPool,
-    Sparkle,
-    Barbell,
-    ForkKnife,
-    Wine,
-    Clock,
-    Fan,
-    TennisBall,
-    Car,
-    Sun,
-    Baby,
-    Bus,
-    WashingMachine,
-    Vault,
-    Television,
-    PhoneCall,
-    Elevator,
-    CheckCircle
+    WifiHighIcon,
+    SwimmingPoolIcon,
+    SparkleIcon,
+    BarbellIcon,
+    ForkKnifeIcon,
+    WineIcon,
+    ClockIcon,
+    FanIcon,
+    TennisBallIcon,
+    CarIcon,
+    SunIcon,
+    BabyIcon,
+    BusIcon,
+    WashingMachineIcon,
+    VaultIcon,
+    TelevisionIcon,
+    PhoneCallIcon,
+    ElevatorIcon,
+    CheckCircleIcon
 } from '@phosphor-icons/react';
 
 /**
@@ -30,24 +30,24 @@ import {
  * parking, beach, kids, shuttle, laundry, safe, tv, phone, elevator
  */
 const featureIcons = {
-    wifi: <WifiHigh />,
-    pool: <SwimmingPool />,
-    spa: <Sparkle />,
-    gym: <Barbell />,
-    restaurant: <ForkKnife />,
-    bar: <Wine />,
-    clock: <Clock />,
-    ac: <Fan />,
-    tennis: <TennisBall />,
-    parking: <Car />,
-    beach: <Sun />,
-    kids: <Baby />,
-    shuttle: <Bus />,
-    laundry: <WashingMachine />,
-    safe: <Vault />,
-    tv: <Television />,
-    phone: <PhoneCall />,
-    elevator: <Elevator />,
+    wifi: <WifiHighIcon />,
+    pool: <SwimmingPoolIcon />,
+    spa: <SparkleIcon />,
+    gym: <BarbellIcon />,
+    restaurant: <ForkKnifeIcon />,
+    bar: <WineIcon />,
+    clock: <ClockIcon />,
+    ac: <FanIcon />,
+    tennis: <TennisBallIcon />,
+    parking: <CarIcon />,
+    beach: <SunIcon />,
+    kids: <BabyIcon />,
+    shuttle: <BusIcon />,
+    laundry: <WashingMachineIcon />,
+    safe: <VaultIcon />,
+    tv: <TelevisionIcon />,
+    phone: <PhoneCallIcon />,
+    elevator: <ElevatorIcon />,
 };
 
 /**
@@ -56,6 +56,6 @@ const featureIcons = {
  * @returns {JSX.Element}
  */
 export const getFeatureIcon = (key) =>
-    featureIcons[key] ?? <CheckCircle />;
+    featureIcons[key] ?? <CheckCircleIcon />;
 
 export default featureIcons;

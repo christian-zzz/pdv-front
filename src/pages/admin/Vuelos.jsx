@@ -180,7 +180,7 @@ const Vuelos = () => {
             ) : (
                 <AdminTable
                     title="Vuelos / Destinos API"
-                    newLabel="+ Nuevo Vuelo"
+                    newLabel="Nuevo Vuelo"
                     columns={COLUMNS}
                     data={flights}
                     pageSize={10}

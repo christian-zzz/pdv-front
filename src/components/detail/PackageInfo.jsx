@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { getFeatureIcon } from '../../utils/featureIcons';
-import { Buildings, Calendar, Users, ForkKnife, CaretDown } from '@phosphor-icons/react';
+import { BuildingsIcon, CalendarIcon, UsersIcon, ForkKnifeIcon, CaretDownIcon } from '@phosphor-icons/react';
 
 /**
  * PackageInfo — Package highlights with icons + description + amenities.
@@ -17,22 +17,22 @@ const PackageInfo = ({ accommodation, days, guestType, boardType, description, a
 
     const highlights = [
         {
-            icon: <Buildings className="w-6 h-6" />,
+            icon: <BuildingsIcon className="w-6 h-6" />,
             label: 'Alojamiento',
             value: accommodation,
         },
         {
-            icon: <Calendar className="w-6 h-6" />,
+            icon: <CalendarIcon className="w-6 h-6" />,
             label: 'Días',
             value: days,
         },
         {
-            icon: <Users className="w-6 h-6" />,
+            icon: <UsersIcon className="w-6 h-6" />,
             label: 'Tipo de Huésped',
             value: guestType,
         },
         {
-            icon: <ForkKnife className="w-6 h-6" />,
+            icon: <ForkKnifeIcon className="w-6 h-6" />,
             label: 'Régimen',
             value: boardType,
         },
@@ -73,7 +73,7 @@ const PackageInfo = ({ accommodation, days, guestType, boardType, description, a
                             className="mt-4 text-[15px] font-bold text-[#ed6f00] hover:text-[#ed6f00]/90 transition-colors flex items-center gap-1.5"
                         >
                             {expanded ? 'Leer menos' : 'Leer mas'}
-                            <CaretDown className={`w-3.5 h-3.5 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}  />
+                            <CaretDownIcon className={`w-3.5 h-3.5 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}  />
                         </button>
                     )}
                 </div>

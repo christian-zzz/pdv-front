@@ -5,6 +5,7 @@ import './index.css'
 import router from './router'
 
 import { AuthProvider } from './context/AuthContext'
+import { TourProvider } from './context/TourContext'
 import { IconContext } from '@phosphor-icons/react'
 
 createRoot(document.getElementById('root')).render(
@@ -18,7 +19,9 @@ createRoot(document.getElementById('root')).render(
           mirrored: false,
         }}
       >
-        <RouterProvider router={router} />
+        <TourProvider>
+          <RouterProvider router={router} />
+        </TourProvider>
       </IconContext.Provider>
     </AuthProvider>
   </StrictMode>,

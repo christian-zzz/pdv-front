@@ -9,6 +9,15 @@ body {
 	background-color: #f4f7fb;
 }
 
+/* Hide scrollbar for elements using custom-scrollbar */
+.custom-scrollbar::-webkit-scrollbar {
+    display: none;
+}
+.custom-scrollbar {
+    -ms-overflow-style: none;  /* IE and Edge */
+    scrollbar-width: none;  /* Firefox */
+}
+
 .price-range {
 	position: absolute;
 	inset: 0;

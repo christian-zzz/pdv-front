@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { MapPin, FileText, Users, ForkKnife, CaretDown, Check } from '@phosphor-icons/react';
+import { MapPinIcon, FileTextIcon, UsersIcon, ForkKnifeIcon, CaretDownIcon, CheckIcon } from '@phosphor-icons/react';
 
 /**
  * FlightInfo — Flight highlights with icons + description + amenities.
@@ -17,22 +17,22 @@ const FlightInfo = ({ destination, requirementsShort, guestType, boardType, desc
 
     const highlights = [
         {
-            icon: <MapPin className="w-6 h-6" />,
+            icon: <MapPinIcon className="w-6 h-6" />,
             label: 'Destino',
             value: destination,
         },
         {
-            icon: <FileText className="w-6 h-6" />,
+            icon: <FileTextIcon className="w-6 h-6" />,
             label: 'Requisitos',
             value: requirementsShort,
         },
         {
-            icon: <Users className="w-6 h-6" />,
+            icon: <UsersIcon className="w-6 h-6" />,
             label: 'Tipo de Huésped',
             value: guestType,
         },
         {
-            icon: <ForkKnife className="w-6 h-6" />,
+            icon: <ForkKnifeIcon className="w-6 h-6" />,
             label: 'Régimen',
             value: boardType,
         },
@@ -73,7 +73,7 @@ const FlightInfo = ({ destination, requirementsShort, guestType, boardType, desc
                             className="mt-4 text-[15px] font-bold text-[#ed6f00] hover:text-[#ed6f00]/90 transition-colors flex items-center gap-1.5"
                         >
                             {expanded ? 'Leer menos' : 'Leer mas'}
-                            <CaretDown className={`w-3.5 h-3.5 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}  />
+                            <CaretDownIcon className={`w-3.5 h-3.5 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}  />
                         </button>
                     )}
                 </div>
@@ -87,7 +87,7 @@ const FlightInfo = ({ destination, requirementsShort, guestType, boardType, desc
                         {requirements.map((req, i) => (
                             <li key={i} className="flex items-start gap-3">
                                 <span className="shrink-0 mt-0.5 w-5 h-5 rounded-full bg-blue-50 text-[#ed6f00] flex items-center justify-center">
-                                    <Check className="w-3.5 h-3.5"  />
+                                    <CheckIcon className="w-3.5 h-3.5"  />
                                 </span>
                                 <span className="text-[15px] text-gray-700 leading-snug">{req}</span>
                             </li>

@@ -111,13 +111,15 @@ const Consultas = () => {
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#ed6f00]"></div>
                 </div>
             ) : (
-                <AdminTable
-                    title="Listado de Consultas"
-                    columns={COLUMNS}
-                    data={inquiries}
-                    pageSize={10}
-                    onView={(row) => setSelectedInquiry(row)}
-                />
+                <div id="tour-consultas-table">
+                    <AdminTable
+                        title="Listado de Consultas"
+                        columns={COLUMNS}
+                        data={inquiries}
+                        pageSize={10}
+                        onView={(row) => setSelectedInquiry(row)}
+                    />
+                </div>
             )}
 
             {/* Assignment Form Section (Displays when a row is clicked) */}

@@ -1,5 +1,5 @@
 import React from 'react';
-import { MapPin } from '@phosphor-icons/react';
+import { MapPinIcon } from '@phosphor-icons/react';
 
 /**
  * LocationMap — Google Maps embed with an "Explorar Mapa" overlay button.
@@ -33,7 +33,7 @@ const LocationMap = ({ query = '', title = 'Ubicación' }) => {
                     rel="noopener noreferrer"
                     className="absolute bottom-6 left-1/2 -translate-x-1/2 flex items-center gap-2 bg-white/95 backdrop-blur-sm rounded-full px-5 py-2.5 shadow-lg text-sm font-semibold text-[#001f6c] hover:bg-white hover:shadow-xl transition-all duration-200"
                 >
-                    <MapPin className="w-5 h-5 text-[#ed6f00]"  />
+                    <MapPinIcon className="w-5 h-5 text-[#ed6f00]"  />
                     Explorar Mapa
                 </a>
             </div>

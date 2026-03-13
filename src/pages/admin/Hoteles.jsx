@@ -11,7 +11,7 @@ import FormCard, {
     FormTextarea,
     FormCheckbox,
 } from '../../components/dashboard/FormCard';
-import { Check, PencilSimple, ArrowLeft, ArrowRight } from '@phosphor-icons/react';
+import { CheckIcon, PencilSimpleIcon, ArrowLeftIcon, ArrowRightIcon, ForkKnifeIcon, BedIcon, SparkleIcon, StarIcon, CheckCircleIcon, XCircleIcon, HouseIcon, ImageIcon, ArticleIcon } from '@phosphor-icons/react';
 
 // ── Board-type Spanish label map (DB stores English keys) ────────────────────
 const BOARD_TYPE_ES = {
@@ -40,7 +40,7 @@ const RegimeCell = ({ row }) => {
     const regime = boardLabel(rawBoard) || row.boardType?.type || row.boardType?.name || '—';
     return (
         <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#001f6c] bg-[#f4f7fb] px-2.5 py-1 rounded-full border border-[#001f6c]/10 whitespace-nowrap">
-            🍽 {regime}
+            <ForkKnifeIcon className="w-3.5 h-3.5" /> {regime}
         </span>
     );
 };
@@ -52,10 +52,10 @@ const StatsCell = ({ row }) => {
     return (
         <div className="flex flex-wrap justify-center gap-1.5">
             <span className="inline-flex items-center gap-1 text-[11px] text-[#001f6c]/70 bg-[#f4f7fb] px-2 py-0.5 rounded-full border border-[#001f6c]/10 whitespace-nowrap">
-                🛏 {roomCount} tipo{roomCount !== 1 ? 's' : ''}
+                <BedIcon className="w-3.5 h-3.5" /> {roomCount} tipo{roomCount !== 1 ? 's' : ''}
             </span>
             <span className="inline-flex items-center gap-1 text-[11px] text-[#001f6c]/70 bg-[#f4f7fb] px-2 py-0.5 rounded-full border border-[#001f6c]/10 whitespace-nowrap">
-                ✨ {serviceCount} serv.
+                <SparkleIcon className="w-3.5 h-3.5" /> {serviceCount} serv.
             </span>
         </div>
     );
@@ -66,18 +66,18 @@ const COLUMNS = [
     { key: 'thumb', label: 'Portada', tdClass: 'px-3 py-2 align-middle w-24', render: (_, row) => <Thumb image={row.post?.thumbnail || row.post?.banner} /> },
     { key: 'post.name', label: 'Nombre', sortable: true },
     { key: 'destination', label: 'Ubicación', sortable: true },
-    { key: 'stars', label: 'Cat.', sortable: true, render: (v) => `${v} ★` },
+    { key: 'stars', label: 'Cat.', sortable: true, render: (v) => <div className="flex items-center justify-center gap-0.5">{v} <StarIcon weight="fill" className="w-3.5 h-3.5 text-amber-500" /></div> },
     { key: 'starting_price', label: 'Precio/Noche ($)', sortable: true },
     { key: 'regime', label: 'Régimen', render: (_, row) => <RegimeCell row={row} /> },
     { key: 'stats', label: 'Servicios', render: (_, row) => <StatsCell row={row} /> },
-    { key: 'isActive', label: 'Activo', sortable: true, render: (v) => v ? '✅' : '❌' },
+    { key: 'isActive', label: 'Activo', sortable: true, render: (v) => v ? <CheckCircleIcon weight="fill" className="w-5 h-5 text-green-500 mx-auto" /> : <XCircleIcon weight="fill" className="w-5 h-5 text-red-500 mx-auto" /> },
 ];
 
 // ── Steps configuration ───────────────────────────────────────────────────────
 const STEPS = [
-    { id: 1, label: 'General', icon: '🏨' },
-    { id: 2, label: 'Imágenes', icon: '🖼️' },
-    { id: 3, label: 'Contenido', icon: '📝' },
+    { id: 1, label: 'General', icon: <HouseIcon className="w-5 h-5" /> },
+    { id: 2, label: 'Imágenes', icon: <ImageIcon className="w-5 h-5" /> },
+    { id: 3, label: 'Contenido', icon: <ArticleIcon className="w-5 h-5" /> },
 ];
 
 // ── Default empty form ────────────────────────────────────────────────────────
@@ -114,8 +114,12 @@ const StepIndicator = ({ current, total }) => (
                             ${!done && !active ? 'bg-white border-gray-200 text-gray-400' : ''}
                         `}>
                             {done ? (
-                                <Check className="w-4 h-4" />
-                            ) : step.id}
+                                <CheckIcon className="w-4 h-4" />
+                            ) : (
+                                <span className="flex items-center justify-center translate-y-[-1px]">
+                                    {step.icon}
+                                </span>
+                            )}
                         </div>
                         <span className={`text-[11px] font-semibold text-center leading-tight
                             ${active ? 'text-[#001f6c]' : ''}
@@ -232,7 +236,7 @@ const HotelForm = ({ lookups, editRow, onSaved, onCancelEdit }) => {
             {isEditing && (
                 <div className="mb-3 flex items-center justify-between bg-amber-50 border border-amber-300 rounded-xl px-5 py-3">
                     <div className="flex items-center gap-2 text-amber-700 font-semibold text-sm">
-                        <PencilSimple className="w-5 h-5" />
+                        <PencilSimpleIcon className="w-5 h-5" />
                         Editando: <span className="font-bold">{editRow?.post?.name}</span>
                     </div>
                     <button type="button" onClick={handleCancel}
@@ -266,7 +270,7 @@ const HotelForm = ({ lookups, editRow, onSaved, onCancelEdit }) => {
                                 </div>
 
                                 <div className="grid grid-cols-2 gap-4">
-                                    <FormSelect label="Categoría (★)" id="ht-categoria"
+                                    <FormSelect label={<span className="flex items-center gap-1">Categoría <StarIcon weight="fill" className="w-3 h-3 text-amber-500" /></span>} id="ht-categoria"
                                         options={[
                                             { value: '1', label: '1 ★' },
                                             { value: '2', label: '2 ★' },
@@ -409,7 +413,7 @@ const HotelForm = ({ lookups, editRow, onSaved, onCancelEdit }) => {
                                 disabled={step === 1}
                                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-[#001f6c]/60 hover:border-[#001f6c]/30 hover:text-[#001f6c] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                             >
-                                <ArrowLeft className="w-4 h-4" />
+                                <ArrowLeftIcon className="w-4 h-4" />
                                 Anterior
                             </button>
 
@@ -429,7 +433,7 @@ const HotelForm = ({ lookups, editRow, onSaved, onCancelEdit }) => {
                                     className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#001f6c] text-white text-sm font-semibold hover:bg-[#001f6c]/90 transition-all shadow-sm"
                                 >
                                     Siguiente
-                                    <ArrowRight className="w-4 h-4" />
+                                    <ArrowRightIcon className="w-4 h-4" />
                                 </button>
                             ) : (
                                 <button
@@ -445,7 +449,7 @@ const HotelForm = ({ lookups, editRow, onSaved, onCancelEdit }) => {
                                         </>
                                     ) : (
                                         <>
-                                            <Check className="w-4 h-4" />
+                                            <CheckIcon className="w-4 h-4" />
                                             {isEditing ? 'Guardar Cambios' : 'Crear Hotel'}
                                         </>
                                     )}
@@ -516,7 +520,7 @@ const Hoteles = () => {
             ) : (
                 <AdminTable
                     title="Alojamientos"
-                    newLabel="+ Nuevo Alojamiento"
+                    newLabel="Nuevo Alojamiento"
                     columns={COLUMNS}
                     data={accommodations}
                     pageSize={10}

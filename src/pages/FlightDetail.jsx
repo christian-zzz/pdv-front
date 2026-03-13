@@ -18,7 +18,7 @@ import bolthmb from '../assets/bolthmb.jpg';
 import miathmb from '../assets/miathmb.jpg';
 import methmb from '../assets/methmb.jpg';
 
-import { MapPin, SuitcaseRolling, CurrencyDollar } from '@phosphor-icons/react';
+import { MapPinIcon, SuitcaseRollingIcon, CurrencyDollarIcon } from '@phosphor-icons/react';
 
 // ── Demo data (will come from API later) ──────────────────────────────────────
 const DEMO_FLIGHT = {
@@ -27,7 +27,7 @@ const DEMO_FLIGHT = {
     priceLabel: '',
     badges: [
         {
-            icon: <MapPin className="w-5 h-5" />,
+            icon: <MapPinIcon className="w-5 h-5" />,
             text: 'Bogotá, Colombia',
         },
     ],
@@ -47,8 +47,8 @@ const DEMO_FLIGHT = {
             'Se debe diligenciar el Check-Mig en la página de Migración Colombia'
         ],
         amenities: [
-            { icon: <SuitcaseRolling className="w-5 h-5" />, label: 'Incluye 1 maleta de 23 kilos' },
-            { icon: <CurrencyDollar className="w-5 h-5" />, label: 'Tarifa para febrero 2026' },
+            { icon: <SuitcaseRollingIcon className="w-5 h-5" />, label: 'Incluye 1 maleta de 23 kilos' },
+            { icon: <CurrencyDollarIcon className="w-5 h-5" />, label: 'Tarifa para febrero 2026' },
         ],
     },
 };

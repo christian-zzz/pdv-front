@@ -18,7 +18,7 @@ import lrqthmb from '../assets/lrqthmb.jpg';
 import mgtathmb from '../assets/mgtathmb.jpg';
 import cocthmb from '../assets/cocthmb.jpg';
 
-import { MapPin } from '@phosphor-icons/react';
+import { MapPinIcon } from '@phosphor-icons/react';
 
 // ── Demo data (will come from API later) ──────────────────────────────────────
 const DEMO_ACCOMMODATION = {
@@ -27,7 +27,7 @@ const DEMO_ACCOMMODATION = {
     priceLabel: '/ noche',
     badges: [
         {
-            icon: <MapPin className="w-5 h-5" />,
+            icon: <MapPinIcon className="w-5 h-5" />,
             text: 'Isla de Margarita, Venezuela',
         },
     ],

@@ -1,7 +1,7 @@
 import React from 'react';
 import footerBg from '../../assets/footer.png';
 import logox from '../../assets/logox.png';
-import { MapPin, PhoneCall, Envelope, InstagramLogo, FacebookLogo } from '@phosphor-icons/react';
+import { MapPinIcon, PhoneCallIcon, EnvelopeIcon, InstagramLogoIcon, FacebookLogoIcon } from '@phosphor-icons/react';
 
 const Footer = () => {
     return (
@@ -48,11 +48,11 @@ const Footer = () => {
                     <div className="flex flex-col items-center md:items-start">
                         <div className="flex items-center gap-4">
                             <div className="flex flex-col gap-3 pt-1 text-[#ec6e00]">
-                                <MapPin className="h-6 w-6" />
-                                <PhoneCall className="h-6 w-6" />
-                                <Envelope className="h-6 w-6" />
-                                <InstagramLogo weight="fill" className="h-6 w-6" />
-                                <FacebookLogo weight="fill" className="h-6 w-6" />
+                                <MapPinIcon className="h-6 w-6" />
+                                <PhoneCallIcon className="h-6 w-6" />
+                                <EnvelopeIcon className="h-6 w-6" />
+                                <InstagramLogoIcon weight="fill" className="h-6 w-6" />
+                                <FacebookLogoIcon weight="fill" className="h-6 w-6" />
                             </div>
                             <div className="text-sm font-semibold leading-relaxed">
                                 <p>PLAN DE VIAJE C.A.</p>

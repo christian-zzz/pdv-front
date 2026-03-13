@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../api/axios';
-import { CheckCircle } from '@phosphor-icons/react';
+import { CheckCircleIcon } from '@phosphor-icons/react';
 
 const WhatsappSettings = () => {
     const [status, setStatus] = useState({ connected: false });
@@ -81,7 +81,7 @@ const WhatsappSettings = () => {
                 </div>
             </div>
 
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+            <div id="tour-whatsapp-card" className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
                 <div className="px-6 py-4 border-b border-gray-100 bg-gray-50 flex items-center justify-between">
                     <h2 className="text-lg font-bold text-[#001f6c]">Estado de Conexión</h2>
                     <span className={`px-3 py-1 rounded-full text-xs font-bold ${status.connected ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
@@ -104,7 +104,7 @@ const WhatsappSettings = () => {
                     ) : status.connected ? (
                         <div className="py-12 flex flex-col items-center">
                             <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-6">
-                                <CheckCircle  className="h-12 w-12 text-green-600" />
+                                <CheckCircleIcon  className="h-12 w-12 text-green-600" />
                             </div>
                             <h3 className="text-xl font-bold text-gray-900 mb-2">¡WhatsApp vinculado correctamente!</h3>
                             <p className="text-gray-500 max-w-md">

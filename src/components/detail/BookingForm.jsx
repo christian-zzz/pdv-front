@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { X, PaperPlaneRight, CheckCircle } from '@phosphor-icons/react';
+import { XIcon, PaperPlaneRightIcon, CheckCircleIcon } from '@phosphor-icons/react';
 
 /**
  * BookingForm — price display + consultation form.
@@ -211,7 +211,7 @@ const BookingForm = ({ price = '$0', priceLabel = '/ persona', isFlight = false,
                                         className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 transition-colors"
                                         title="Quitar niños"
                                     >
-                                        <X className="w-4 h-4"  />
+                                        <XIcon className="w-4 h-4"  />
                                     </button>
                                 </div>
                             </>
@@ -235,12 +235,12 @@ const BookingForm = ({ price = '$0', priceLabel = '/ persona', isFlight = false,
                     className="w-full mt-2 rounded-xl bg-[#ed6f00] text-white font-semibold py-3 text-sm shadow-md hover:bg-[#ed6f00]/90 hover:shadow-lg active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2"
                 >
                     Enviar Consulta
-                    <PaperPlaneRight className="w-4 h-4"  />
+                    <PaperPlaneRightIcon className="w-4 h-4"  />
                 </button>
 
                 {/* Cancellation note */}
                 <p className="hidden text-xs text-center text-gray-400 flex items-center justify-center gap-1 mt-1">
-                    <CheckCircle className="w-3.5 h-3.5 text-green-500" />
+                    <CheckCircleIcon className="w-3.5 h-3.5 text-green-500" />
                     Cancelación gratuita hasta 48 horas antes
                 </p>
             </form>

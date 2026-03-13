@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { getFeatureIcon } from '../../utils/featureIcons';
-import { MapPin, Star, ForkKnife, CaretDown } from '@phosphor-icons/react';
+import { MapPinIcon, StarIcon, ForkKnifeIcon, CaretDownIcon } from '@phosphor-icons/react';
 
 /**
  * AccommodationInfo — matches PackageInfo layout patterns exactly.
@@ -16,17 +16,17 @@ const AccommodationInfo = ({ stars, destination, boardType, description, ameniti
 
     const highlights = [
         {
-            icon: <MapPin className="w-6 h-6" />,
+            icon: <MapPinIcon className="w-6 h-6" />,
             label: 'Destino',
             value: destination,
         },
         {
-            icon: <Star className="w-6 h-6" weight="fill" />,
+            icon: <StarIcon className="w-6 h-6" weight="fill" />,
             label: 'Categoría',
             value: `${stars} Estrellas`,
         },
         {
-            icon: <ForkKnife className="w-6 h-6" />,
+            icon: <ForkKnifeIcon className="w-6 h-6" />,
             label: 'Régimen',
             value: boardType,
         },
@@ -67,7 +67,7 @@ const AccommodationInfo = ({ stars, destination, boardType, description, ameniti
                             className="mt-4 text-[15px] font-bold text-[#ed6f00] hover:text-[#ed6f00]/90 transition-colors flex items-center gap-1.5"
                         >
                             {expanded ? 'Leer menos' : 'Leer más'}
-                            <CaretDown className={`w-3.5 h-3.5 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}  />
+                            <CaretDownIcon className={`w-3.5 h-3.5 transition-transform duration-200 ${expanded ? 'rotate-180' : ''}`}  />
                         </button>
                     )}
                 </div>

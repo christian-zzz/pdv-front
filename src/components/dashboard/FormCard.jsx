@@ -1,6 +1,6 @@
 import React from 'react';
 import featureIcons from '../../utils/featureIcons';
-import { Plus, Images, Check, MapPin } from '@phosphor-icons/react';
+import { PlusIcon, ImagesIcon, CheckIcon, MapPinIcon, XIcon } from '@phosphor-icons/react';
 
 // ─── Predefined services catalogue ───────────────────────────────────────────
 const PREDEFINED_SERVICES = [
@@ -90,7 +90,7 @@ export const FormFeatureList = ({ label, id, value = [], onChange }) => {
                             >
                                 {Icon && <span className="flex items-center">{React.cloneElement(Icon, { className: 'w-3.5 h-3.5' })}</span>}
                                 {svc.label}
-                                {active && <span className="ml-0.5 opacity-80 text-[10px]">✓</span>}
+                                {active && <CheckIcon weight="bold" className="ml-0.5 opacity-80 w-3 h-3" />}
                             </button>
                         );
                     })}
@@ -107,7 +107,9 @@ export const FormFeatureList = ({ label, id, value = [], onChange }) => {
                                     {ChipIcon && <span className="text-[#ed6f00] flex items-center">{React.cloneElement(ChipIcon, { className: 'w-3.5 h-3.5' })}</span>}
                                     {item.label}
                                     <button type="button" onClick={() => handleRemove(item)}
-                                        className="text-gray-400 hover:text-red-500 font-bold ml-0.5 transition-colors">×</button>
+                                        className="text-gray-400 hover:text-red-500 transition-colors">
+                                        <XIcon weight="bold" className="w-3.5 h-3.5" />
+                                    </button>
                                 </span>
                             );
                         })}
@@ -119,7 +121,7 @@ export const FormFeatureList = ({ label, id, value = [], onChange }) => {
                     {!showCustom ? (
                         <button type="button" onClick={() => setShowCustom(true)}
                             className="flex items-center gap-1.5 text-xs text-[#001f6c]/50 hover:text-[#ed6f00] font-semibold transition-colors">
-                            <Plus className="w-3.5 h-3.5"  />
+                            <PlusIcon className="w-3.5 h-3.5"  />
                             Añadir servicio personalizado
                         </button>
                     ) : (
@@ -158,9 +160,13 @@ export const FormFeatureList = ({ label, id, value = [], onChange }) => {
                                 className="flex-1 border-b border-gray-300 px-2 py-1 text-sm focus:outline-none focus:border-[#ed6f00]"
                             />
                             <button type="button" onClick={handleAddCustom}
-                                className="text-[#ed6f00] font-bold text-xl leading-none px-1 hover:scale-110 transition-transform">+</button>
+                                className="text-[#ed6f00] font-bold hover:scale-110 transition-transform">
+                                <PlusIcon weight="bold" className="w-5 h-5" />
+                            </button>
                             <button type="button" onClick={() => { setShowCustom(false); setCustomLabel(''); }}
-                                className="text-gray-400 hover:text-red-500 text-sm font-bold transition-colors">✕</button>
+                                className="text-gray-400 hover:text-red-500 transition-colors">
+                                <XIcon weight="bold" className="w-4 h-4" />
+                            </button>
                         </div>
                     )}
                 </div>
@@ -231,7 +237,7 @@ export const FormSelectCreatable = ({ label, id, options = [], value, onChange, 
                         disabled={isCreating}
                         className="bg-[#ed6f00] hover:bg-[#ed6f00]/80 text-white font-bold text-xs px-3 py-1.5 rounded-lg shadow disabled:opacity-50 transition-colors"
                     >
-                        {isCreating ? '…' : '+'}
+                        {isCreating ? <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <PlusIcon weight="bold" />}
                     </button>
                 </div>
             )}
@@ -298,7 +304,7 @@ export const FormMultiSelect = ({ label, id, options = [], value = [], onChange,
                         disabled={isCreating}
                         className="bg-[#ed6f00] hover:bg-[#ed6f00]/80 text-white font-bold text-xs px-3 py-1.5 rounded-lg shadow disabled:opacity-50 transition-colors"
                     >
-                        {isCreating ? '...' : '+'}
+                        {isCreating ? <div className="w-3 h-3 border-2 border-white border-t-transparent rounded-full animate-spin" /> : <PlusIcon weight="bold" />}
                     </button>
                 </div>
             )}
@@ -337,8 +343,8 @@ export const FormDynamicList = ({ label, id, value = '', onChange, placeholder =
                         className="flex-1 border-b border-gray-300 px-2 py-1 text-sm focus:outline-none focus:border-[#ed6f00]"
                         {...rest}
                     />
-                    <button type="button" onClick={handleAdd} className="text-[#ed6f00] font-bold text-xl leading-none px-2 hover:scale-110 transition-transform">
-                        +
+                    <button type="button" onClick={handleAdd} className="text-[#ed6f00] hover:scale-110 transition-transform">
+                        <PlusIcon weight="bold" className="w-5 h-5" />
                     </button>
                 </div>
                 {list.length > 0 && (
@@ -346,8 +352,8 @@ export const FormDynamicList = ({ label, id, value = '', onChange, placeholder =
                         {list.map((item, index) => (
                             <li key={index} className="flex items-center gap-1.5 bg-[#f4f7fb] text-[#001f6c] px-3 py-1 rounded-full text-xs font-semibold border border-[#ed6f00]/20 shadow-sm">
                                 <span>{item}</span>
-                                <button type="button" onClick={() => handleRemove(index)} className="text-gray-400 hover:text-red-500 font-bold ml-1 transition-colors">
-                                    ×
+                                <button type="button" onClick={() => handleRemove(index)} className="text-gray-400 hover:text-red-500 transition-colors">
+                                    <XIcon weight="bold" className="w-3.5 h-3.5" />
                                 </button>
                             </li>
                         ))}
@@ -416,7 +422,7 @@ export const FormCheckbox = ({ label, id, ...rest }) => (
 /** Single image upload placeholder slot */
 export const ImageSlot = ({ label, large = false }) => (
     <label className={`flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-300 bg-[#f4f7fb] cursor-pointer hover:border-[#ed6f00] transition-colors group ${large ? 'h-32 w-full' : 'h-20 w-20'}`}>
-        <Images className="w-7 h-7 text-[#ed6f00] group-hover:scale-110 transition-transform" />
+        <ImagesIcon className="w-7 h-7 text-[#ed6f00] group-hover:scale-110 transition-transform" />
         {label && <span className="text-[10px] text-gray-400 mt-1">{label}</span>}
         <input type="file" accept="image/*" className="hidden" />
     </label>
@@ -541,7 +547,7 @@ export const FormPlaceSearch = ({ label, id, value = '', onChange, placeholder =
                 )}
                 {selected && !loading && (
                     <div className="absolute right-2 top-1/2 -translate-y-1/2 text-green-500">
-                        <Check className="w-4 h-4"  />
+                        <CheckIcon className="w-4 h-4"  />
                     </div>
                 )}
             </div>
@@ -551,7 +557,7 @@ export const FormPlaceSearch = ({ label, id, value = '', onChange, placeholder =
                     {results.map((place) => (
                         <li key={place.place_id} onClick={() => handleSelect(place)}
                             className="flex items-start gap-2 px-3 py-2.5 cursor-pointer hover:bg-[#f4f7fb] text-sm border-b border-gray-50 last:border-0 transition-colors">
-                            <MapPin className="w-4 h-4 shrink-0 mt-0.5 text-[#ed6f00]"  />
+                            <MapPinIcon className="w-4 h-4 shrink-0 mt-0.5 text-[#ed6f00]"  />
                             <span className="text-[#001f6c] leading-tight">{place.display_name}</span>
                         </li>
                     ))}

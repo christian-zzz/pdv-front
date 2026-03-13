@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import ImageLightbox from './ImageLightbox';
-import { Images } from '@phosphor-icons/react';
+import { ImagesIcon } from '@phosphor-icons/react';
 
 /**
  * DetailHero — title, metadata badges, and a photo gallery grid.
@@ -59,7 +59,7 @@ const DetailHero = ({ title, badges = [], images = [] }) => {
                             {/* "Show all photos" button — mobile only when no side thumbs */}
                             {images.length > 1 && (
                                 <span className="md:hidden absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm rounded-full px-4 py-1.5 text-xs font-semibold text-[#001f6c] shadow-md flex items-center gap-1.5">
-                                    <Images className="w-4 h-4"  />
+                                    <ImagesIcon className="w-4 h-4"  />
                                     Ver todas las fotos
                                 </span>
                             )}
@@ -91,7 +91,7 @@ const DetailHero = ({ title, badges = [], images = [] }) => {
                                     {/* "Show all photos" on last thumbnail */}
                                     {isLast && (
                                         <span className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1.5 text-xs font-semibold text-[#001f6c] shadow-md flex items-center gap-1.5">
-                                            <Images className="w-4 h-4"  />
+                                            <ImagesIcon className="w-4 h-4"  />
                                             Ver todas las fotos
                                         </span>
                                     )}

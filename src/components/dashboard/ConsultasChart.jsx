@@ -1,6 +1,6 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowUpRight } from '@phosphor-icons/react';
+import { ArrowUpRightIcon } from '@phosphor-icons/react';
 
 const DAYS = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom'];
 
@@ -61,7 +61,7 @@ const ConsultasChart = ({ data = [4, 7, 5, 9, 6, 12, 8], to = '#' }) => {
             </div>
 
             <Link to={to} className="text-[#001f6c]/40 hover:text-[#ed6f00] transition-colors shrink-0">
-                <ArrowUpRight className="w-6 h-6"  />
+                <ArrowUpRightIcon className="w-6 h-6"  />
             </Link>
         </div>
     );

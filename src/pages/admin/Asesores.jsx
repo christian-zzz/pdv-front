@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../api/axios';
-import { User, Phone, Spinner } from '@phosphor-icons/react';
+import { UserIcon, PhoneIcon, SpinnerIcon } from '@phosphor-icons/react';
 
 const Asesores = () => {
     const [consultants, setConsultants] = useState([]);
@@ -102,12 +102,12 @@ const Asesores = () => {
                                     {consultant.img ? (
                                         <img src={consultant.img} alt={consultant.name} className="w-full h-full object-cover" />
                                     ) : (
-                                        <User className="w-10 h-10 text-gray-400" />
+                                        <UserIcon className="w-10 h-10 text-gray-400" />
                                     )}
                                 </div>
                                 <h3 className="font-bold text-gray-900 text-lg mb-1">{consultant.name}</h3>
                                 <div className="flex items-center gap-1.5 text-gray-500 text-sm mb-4">
-                                    <Phone  className="w-4 h-4" />
+                                    <PhoneIcon  className="w-4 h-4" />
                                     {consultant.phone}
                                 </div>
                                 <button
@@ -183,7 +183,7 @@ const Asesores = () => {
                             >
                                 {submitting ? (
                                     <>
-                                        <Spinner className="animate-spin h-5 w-5 text-white" />
+                                        <SpinnerIcon className="animate-spin h-5 w-5 text-white" />
                                         Guardando...
                                     </>
                                 ) : (

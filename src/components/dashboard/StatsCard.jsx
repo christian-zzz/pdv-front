@@ -1,9 +1,9 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowUpRight } from '@phosphor-icons/react';
+import { ArrowUpRightIcon } from '@phosphor-icons/react';
 
 const ArrowIcon = () => (
-    <ArrowUpRight className="w-6 h-6"  />
+    <ArrowUpRightIcon className="w-6 h-6"  />
 );
 
 /**

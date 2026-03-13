@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { CaretLeft, CaretRight, X } from '@phosphor-icons/react';
+import { CaretLeftIcon, CaretRightIcon, XIcon } from '@phosphor-icons/react';
 
 const GAP = 24;
 
@@ -142,7 +142,7 @@ const TestimonialCarousel = ({ title, subtitle, items = [], className = '' }) =>
                 aria-label="Previous testimonials"
                 className="absolute left-1 sm:left-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/90 hover:bg-white hover:scale-110 active:scale-95 p-2 shadow-md transition-all duration-200"
             >
-                <CaretLeft className="h-5 w-5 text-[#001f6c]" />
+                <CaretLeftIcon className="h-5 w-5 text-[#001f6c]" />
             </button>
 
             {/* Viewport */}
@@ -171,7 +171,7 @@ const TestimonialCarousel = ({ title, subtitle, items = [], className = '' }) =>
                 aria-label="Next testimonials"
                 className="absolute right-1 sm:right-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/90 hover:bg-white hover:scale-110 active:scale-95 p-2 shadow-md transition-all duration-200"
             >
-                <CaretRight className="h-5 w-5 text-[#001f6c]" />
+                <CaretRightIcon className="h-5 w-5 text-[#001f6c]" />
             </button>
 
             {/* ── Lightbox ──────────────────────────────────────── */}
@@ -186,7 +186,7 @@ const TestimonialCarousel = ({ title, subtitle, items = [], className = '' }) =>
                         className="absolute top-4 right-4 z-10 rounded-full bg-white/20 hover:bg-white/40 p-2 transition-colors"
                         aria-label="Close"
                     >
-                        <X className="w-6 h-6 text-white" />
+                        <XIcon className="w-6 h-6 text-white" />
                     </button>
                     <img
                         src={lightboxImg}

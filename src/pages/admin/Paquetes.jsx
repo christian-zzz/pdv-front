@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
+import { PlusIcon } from '@phosphor-icons/react';
 import AdminTable from '../../components/dashboard/AdminTable';
 import FormCard, {
     FormInput, FormSelect, FormTextarea, FormCheckbox, ImageSlot,
 } from '../../components/dashboard/FormCard';
+import { MapPinIcon, CalendarIcon, UsersIcon, CurrencyDollarIcon, ChartBarIcon, ClockIcon } from '@phosphor-icons/react';
 
 // ── Thumbnail helper ──────────────────────────────────────────────────────────
 const Thumb = ({ color = '#001f6c', initials = '' }) => (
@@ -30,12 +32,12 @@ const DATA = [
 const COLUMNS = [
     { key: 'thumb', label: 'Portada', render: (v) => <Thumb color={v.color} initials={v.initials} /> },
     { key: 'nombre', label: 'Nombre' },
-    { key: 'ubicacion', label: 'Ubicación' },
-    { key: 'dias', label: 'Días' },
-    { key: 'personas', label: 'Personas' },
-    { key: 'precio', label: 'Precio' },
-    { key: 'consultas', label: 'Consultas' },
-    { key: 'editado', label: 'Editado' },
+    { key: 'ubicacion', label: 'Ubicación', render: (v) => <span className="inline-flex items-center gap-1 text-[#001f6c]/70"><MapPinIcon size={12} /> {v}</span> },
+    { key: 'dias', label: 'Días', render: (v) => <span className="inline-flex items-center gap-1 text-[#001f6c]/70"><CalendarIcon size={12} /> {v}</span> },
+    { key: 'personas', label: 'Personas', render: (v) => <span className="inline-flex items-center gap-1 text-[#001f6c]/70"><UsersIcon size={12} /> {v}</span> },
+    { key: 'precio', label: 'Precio', render: (v) => <span className="font-bold text-[#ed6f00] inline-flex items-center gap-0.5"><CurrencyDollarIcon size={14} />{v.replace('Desde ', '')}</span> },
+    { key: 'consultas', label: 'Visitas', render: (v) => <span className="inline-flex items-center gap-1 text-[#001f6c]/70"><ChartBarIcon size={12} /> {v}</span> },
+    { key: 'editado', label: 'Editado', render: (v) => <span className="inline-flex items-center gap-1 text-gray-400 text-[10px]"><ClockIcon size={10} /> {v}</span> },
 ];
 
 // ── Form ──────────────────────────────────────────────────────────────────────
@@ -101,8 +103,9 @@ const PaqueteForm = () => {
                             <div className="grid grid-cols-3 gap-1.5">
                                 <ImageSlot /><ImageSlot /><ImageSlot />
                                 <ImageSlot /><ImageSlot />
-                                <label className="h-20 w-20 flex items-center justify-center rounded-xl border-2 border-dashed border-[#ed6f00]/50 bg-[#f4f7fb] cursor-pointer hover:border-[#ed6f00] transition-colors text-2xl text-[#ed6f00] font-bold">
-                                    +<input type="file" accept="image/*" multiple className="hidden" />
+                                <label className="h-20 w-20 flex items-center justify-center rounded-xl border-2 border-dashed border-[#ed6f00]/50 bg-[#f4f7fb] cursor-pointer hover:border-[#ed6f00] transition-colors text-[#ed6f00]">
+                                    <PlusIcon weight="bold" className="w-6 h-6" />
+                                    <input type="file" accept="image/*" multiple className="hidden" />
                                 </label>
                             </div>
                         </div>
@@ -127,17 +130,19 @@ const PaqueteForm = () => {
 // ── Page ──────────────────────────────────────────────────────────────────────
 const Paquetes = () => (
     <div className="p-6 space-y-8">
-        <AdminTable
-            title="Paquetes"
-            newLabel="+ Nuevo Paquete"
-            columns={COLUMNS}
-            data={DATA}
-            pageSize={5}
-            onNew={() => document.getElementById('form-paquete')?.scrollIntoView({ behavior: 'smooth' })}
-            onView={(row) => alert(`Ver: ${row.nombre}`)}
-            onEdit={(row) => alert(`Editar: ${row.nombre}`)}
-            onArchive={(row) => alert(`Archivar: ${row.nombre}`)}
-        />
+        <div id="tour-paquetes-table">
+            <AdminTable
+                title="Paquetes"
+                newLabel="Nuevo Paquete"
+                columns={COLUMNS}
+                data={DATA}
+                pageSize={5}
+                onNew={() => document.getElementById('form-paquete')?.scrollIntoView({ behavior: 'smooth' })}
+                onView={(row) => alert(`Ver: ${row.nombre}`)}
+                onEdit={(row) => alert(`Editar: ${row.nombre}`)}
+                onArchive={(row) => alert(`Archivar: ${row.nombre}`)}
+            />
+        </div>
         <div id="form-paquete">
             <PaqueteForm />
         </div>

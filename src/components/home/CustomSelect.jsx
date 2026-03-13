@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { CaretDown } from '@phosphor-icons/react';
+import { CaretDownIcon } from '@phosphor-icons/react';
 
 /**
  * CustomSelect — fully-styled dropdown replacing native <select>.
@@ -50,7 +50,7 @@ const CustomSelect = ({ label, options = [], value, onChange, placeholder = 'Sel
             >
                 <span>{selected}</span>
                 {/* Arrow icon — rotates when open */}
-                <CaretDown
+                <CaretDownIcon
                     className={`shrink-0 w-4 h-4 text-[#ed6f00] transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
                 />
             </button>

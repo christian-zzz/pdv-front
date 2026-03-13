@@ -18,7 +18,7 @@ import detail4 from '../assets/detail4.jpg';
 import detail5 from '../assets/detail5.jpg';
 import detail6 from '../assets/detail6.jpg';
 
-import { MapPin, Star } from '@phosphor-icons/react';
+import { MapPinIcon, StarIcon } from '@phosphor-icons/react';
 
 // ── Demo data (will come from API later) ──────────────────────────────────────
 const DEMO_PACKAGE = {
@@ -27,11 +27,11 @@ const DEMO_PACKAGE = {
     priceLabel: '/ persona',
     badges: [
         {
-            icon: <MapPin className="w-5 h-5" />,
+            icon: <MapPinIcon className="w-5 h-5" />,
             text: 'Isla de Margarita, Venezuela'
         },
         {
-            icon: <Star weight="fill" className="w-5 h-5 text-amber-500" />,
+            icon: <StarIcon weight="fill" className="w-5 h-5 text-amber-500" />,
             text: '4'
         },
     ],

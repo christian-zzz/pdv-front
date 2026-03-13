@@ -2,7 +2,8 @@ import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import logo from '../../assets/logo.png';
-import { House, Package, Airplane, Buildings, Article, ChatTeardropText, Users, UserCircle, WhatsappLogo, Info, Images, PencilLine, Question, SignOut } from '@phosphor-icons/react';
+import { useTour } from '../../context/TourContext';
+import { HouseIcon, PackageIcon, AirplaneIcon, BuildingsIcon, ArticleIcon, ChatTeardropTextIcon, UsersIcon, UserCircleIcon, WhatsappLogoIcon, InfoIcon, ImagesIcon, PencilLineIcon, QuestionIcon, SignOutIcon } from '@phosphor-icons/react';
 
 const NAV_ITEMS = [
     {
@@ -10,80 +11,100 @@ const NAV_ITEMS = [
         items: [
             {
                 label: 'Dashboard',
+                id: 'nav-dashboard',
                 to: '/dashboard',
                 allowedRoles: [1, 2, 3],
-                icon: <House className="w-5 h-5"  />,
-            },
-            {
-                label: 'Paquetes',
-                to: '/dashboard/paquetes',
-                allowedRoles: [1, 2],
-                icon: <Package className="w-5 h-5"  />,
-            },
-            {
-                label: 'Vuelos',
-                to: '/dashboard/vuelos',
-                allowedRoles: [1, 2],
-                icon: <Airplane className="w-5 h-5"  />,
-            },
-            {
-                label: 'Hoteles',
-                to: '/dashboard/hoteles',
-                allowedRoles: [1, 2],
-                icon: <Buildings className="w-5 h-5"  />,
-            },
-            {
-                label: 'Blog',
-                to: '/dashboard/blog',
-                allowedRoles: [1, 2],
-                icon: <Article className="w-5 h-5"  />,
-            },
-            {
-                label: 'Consultas',
-                to: '/dashboard/consultas',
-                allowedRoles: [1, 3],
-                icon: <ChatTeardropText className="w-5 h-5"  />,
-            },
-            {
-                label: 'Asesores',
-                to: '/dashboard/asesores',
-                allowedRoles: [1, 3],
-                icon: <Users className="w-5 h-5"  />,
+                icon: <HouseIcon className="w-5 h-5"  />,
             },
             {
                 label: 'Usuarios',
+                id: 'nav-usuarios',
                 to: '/dashboard/usuarios',
                 allowedRoles: [1],
-                icon: <UserCircle className="w-5 h-5"  />,
+                icon: <UserCircleIcon className="w-5 h-5"  />,
+            },
+        ],
+    },
+    {
+        section: 'Catálogo',
+        items: [
+            {
+                label: 'Paquetes',
+                id: 'nav-paquetes',
+                to: '/dashboard/paquetes',
+                allowedRoles: [1, 2],
+                icon: <PackageIcon className="w-5 h-5"  />,
+            },
+            {
+                label: 'Vuelos',
+                id: 'nav-vuelos',
+                to: '/dashboard/vuelos',
+                allowedRoles: [1, 2],
+                icon: <AirplaneIcon className="w-5 h-5"  />,
+            },
+            {
+                label: 'Hoteles',
+                id: 'nav-hoteles',
+                to: '/dashboard/hoteles',
+                allowedRoles: [1, 2],
+                icon: <BuildingsIcon className="w-5 h-5"  />,
+            },
+            {
+                label: 'Blog',
+                id: 'nav-blog',
+                to: '/dashboard/blog',
+                allowedRoles: [1, 2],
+                icon: <ArticleIcon className="w-5 h-5"  />,
+            },
+        ],
+    },
+    {
+        section: 'Atención',
+        items: [
+            {
+                label: 'Consultas',
+                id: 'nav-consultas',
+                to: '/dashboard/consultas',
+                allowedRoles: [1, 3],
+                icon: <ChatTeardropTextIcon className="w-5 h-5"  />,
+            },
+            {
+                label: 'Asesores',
+                id: 'nav-asesores',
+                to: '/dashboard/asesores',
+                allowedRoles: [1, 3],
+                icon: <UsersIcon className="w-5 h-5"  />,
             },
             {
                 label: 'WhatsApp',
+                id: 'nav-whatsapp',
                 to: '/dashboard/whatsapp',
                 allowedRoles: [1, 3],
-                icon: <WhatsappLogo className="w-5 h-5"  />,
+                icon: <WhatsappLogoIcon className="w-5 h-5"  />,
             },
         ],
     },
     {
         section: 'Editar Página',
+        id: 'nav-edit-pages',
         items: [
             {
                 label: 'Información',
                 to: '/dashboard/informacion',
                 allowedRoles: [1, 2],
-                icon: <Info className="w-5 h-5"  />,
+                icon: <InfoIcon className="w-5 h-5"  />,
             },
             {
                 label: 'Imagenes',
                 to: '/dashboard/imagenes',
                 allowedRoles: [1, 2],
-                icon: <Images className="w-5 h-5"  />,
+                icon: <ImagesIcon className="w-5 h-5"  />,
             },
             {
                 label: 'Contenido',
                 to: '/dashboard/contenido',
                 allowedRoles: [1, 2],
-                icon: <PencilLine className="w-5 h-5"  />,
+                icon: <PencilLineIcon className="w-5 h-5"  />,
             },
         ],
     },
@@ -94,8 +115,8 @@ const SidebarLink = ({ to, icon, label, end }) => (
         to={to}
         end={end}
         className={({ isActive }) =>
-            `flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium transition-all duration-200 ${isActive
-                ? 'bg-[#ed6f00] text-white shadow-md shadow-orange-200'
+            `flex items-center gap-3 px-3 py-1.5 rounded-lg text-sm font-medium transition-all duration-200 ${isActive
+                ? 'bg-[#ed6f00] text-white shadow-sm shadow-orange-200'
                 : 'text-[#4a5878] hover:bg-[#001f6c]/8 hover:text-[#001f6c]'
             }`
         }
@@ -108,6 +129,7 @@ const SidebarLink = ({ to, icon, label, end }) => (
 const Sidebar = () => {
     const navigate = useNavigate();
     const { user, logout } = useAuth();
+    const { startTour } = useTour();
 
     const handleLogout = async () => {
         await logout();
@@ -117,28 +139,28 @@ const Sidebar = () => {
     return (
         <aside className="w-60 shrink-0 bg-white border-r border-gray-200 flex flex-col h-screen sticky top-0">
             {/* Logo */}
-            <div className="flex items-center gap-3 px-5 py-4 border-b border-gray-100">
-                <img src={logo} alt="Plan de Viaje" className="h-9 w-auto object-contain" />
+            <div className="flex items-center gap-3 px-4 py-3 border-b border-gray-100">
+                <img src={logo} alt="Plan de Viaje" className="h-8 w-auto object-contain" />
                 <span className="text-xs font-bold text-[#001f6c] uppercase tracking-wider leading-tight">
                     Plan de<br />Viaje
                 </span>
             </div>
 
             {/* Nav */}
-            <nav className="flex-1 px-3 py-4 space-y-5 overflow-y-auto">
+            <nav className="flex-1 px-3 py-3 space-y-3 overflow-y-auto custom-scrollbar">
                 {NAV_ITEMS.map(({ section, items }) => {
                     const filteredItems = items.filter(item => user && item.allowedRoles.includes(user.role));
 
                     if (filteredItems.length === 0) return null;
 
                     return (
-                        <div key={section}>
-                            <p className="text-[10px] font-bold uppercase tracking-widest text-gray-400 px-4 mb-2">
+                        <div key={section} id={NAV_ITEMS.find(n => n.section === section)?.id}>
+                            <p className="text-[10px] font-bold uppercase tracking-widest text-[#001f6c]/50 px-3 mb-1">
                                 {section}
                             </p>
-                            <ul className="space-y-1">
+                            <ul className="space-y-0.5">
                                 {filteredItems.map((item) => (
-                                    <li key={item.to}>
+                                    <li key={item.to} id={item.id}>
                                         <SidebarLink
                                             to={item.to}
                                             icon={item.icon}
@@ -154,17 +176,37 @@ const Sidebar = () => {
             </nav>
 
             {/* Bottom */}
-            <div className="px-3 py-4 border-t border-gray-100 space-y-1">
-                <SidebarLink
-                    to="/dashboard/ayuda"
-                    label="Ayuda"
-                    icon={<Question className="w-5 h-5"  />}
-                />
+            <div className="px-3 py-3 border-t border-gray-100 space-y-0.5">
+                {user?.role === 1 ? (
+                    <div className="relative group">
+                        <button
+                            className="w-full flex items-center justify-between px-3 py-1.5 rounded-lg text-sm font-medium text-[#4a5878] hover:bg-[#001f6c]/8 hover:text-[#001f6c] transition-all duration-200"
+                        >
+                            <div className="flex items-center gap-3">
+                                <QuestionIcon className="w-5 h-5" />
+                                Tour de Ayuda
+                            </div>
+                        </button>
+                        <div className="absolute bottom-full left-0 w-full mb-1 hidden group-hover:flex flex-col bg-white border border-gray-100 shadow-xl rounded-xl overflow-hidden z-50">
+                            <button onClick={() => startTour(1)} className="px-4 py-2 text-xs text-left text-gray-700 hover:bg-[#ed6f00] hover:text-white transition-colors">Tour Administrador</button>
+                            <button onClick={() => startTour(2)} className="px-4 py-2 text-xs text-left text-gray-700 hover:bg-[#ed6f00] hover:text-white transition-colors">Tour Editor</button>
+                            <button onClick={() => startTour(3)} className="px-4 py-2 text-xs text-left text-gray-700 hover:bg-[#ed6f00] hover:text-white transition-colors">Tour Asesor</button>
+                        </div>
+                    </div>
+                ) : (
+                    <button
+                        onClick={() => startTour(user?.role)}
+                        className="w-full flex items-center gap-3 px-3 py-1.5 rounded-lg text-sm font-medium text-[#4a5878] hover:bg-[#001f6c]/8 hover:text-[#001f6c] transition-all duration-200"
+                    >
+                        <QuestionIcon className="w-5 h-5" />
+                        Repetir Tour
+                    </button>
+                )}
                 <button
                     onClick={handleLogout}
-                    className="w-full flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-medium text-red-500 hover:bg-red-50 transition-all duration-200"
+                    className="w-full flex items-center gap-3 px-3 py-1.5 rounded-lg text-sm font-medium text-red-500 hover:bg-red-50 transition-all duration-200"
                 >
-                    <SignOut className="w-5 h-5"  />
+                    <SignOutIcon className="w-5 h-5"  />
                     Cerrar Sesión
                 </button>
             </div>
