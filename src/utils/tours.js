@@ -21,6 +21,10 @@ const navigateTo = (path) => {
     }
 };
 
+const openSidebarSection = (sectionName) => {
+    window.dispatchEvent(new CustomEvent('openSidebarSection', { detail: sectionName }));
+};
+
 // ── Admin Tour ─────────────────────────────────────────────────────────────
 export const adminSteps = [
     {
@@ -40,7 +44,11 @@ export const adminSteps = [
     },
     {
         element: '#nav-usuarios',
-        popover: { ...popoverConfig, title: 'Gestión de Usuarios', description: 'Como Administrador, tienes acceso exclusivo para gestionar a los miembros de tu equipo.', side: 'right', align: 'center' }
+        popover: { ...popoverConfig, title: 'Gestión de Usuarios', description: 'Como Administrador, tienes acceso exclusivo para gestionar a los miembros de tu equipo.', side: 'right', align: 'center' },
+        onHighlightStarted: () => {
+            openSidebarSection('Menú');
+            navigateTo('/dashboard/usuarios');
+        }
     },
     {
         element: '#tour-usuarios-table',
@@ -54,7 +62,11 @@ export const adminSteps = [
     },
     {
         element: '#nav-edit-pages',
-        popover: { ...popoverConfig, title: 'Edición de Páginas', description: 'Aquí podrás cambiar los textos, información e imágenes públicas del sitio web.', side: 'right', align: 'start' }
+        popover: { ...popoverConfig, title: 'Edición de Páginas', description: 'Aquí podrás cambiar los textos, información e imágenes públicas del sitio web.', side: 'right', align: 'start' },
+        onHighlightStarted: () => {
+            openSidebarSection('Editar Página');
+            navigateTo('/dashboard/informacion');
+        }
     },
 ];
 
@@ -67,7 +79,11 @@ export const editorSteps = [
     },
     {
         element: '#nav-paquetes',
-        popover: { ...popoverConfig, title: 'Menú de Ofertas', description: 'Empecemos revisando el inventario de paquetes.', side: 'right', align: 'center' }
+        popover: { ...popoverConfig, title: 'Menú de Ofertas', description: 'Empecemos revisando el inventario de paquetes.', side: 'right', align: 'center' },
+        onHighlightStarted: () => {
+            openSidebarSection('Catálogo');
+            navigateTo('/dashboard/paquetes');
+        }
     },
     {
         element: '#tour-paquetes-table',
@@ -81,7 +97,11 @@ export const editorSteps = [
     },
     {
         element: '#nav-blog',
-        popover: { ...popoverConfig, title: 'Sección del Blog', description: 'También tienes acceso al blog de la plataforma.', side: 'right', align: 'center' }
+        popover: { ...popoverConfig, title: 'Sección del Blog', description: 'También tienes acceso al blog de la plataforma.', side: 'right', align: 'center' },
+        onHighlightStarted: () => {
+            openSidebarSection('Catálogo');
+            navigateTo('/dashboard/blog');
+        }
     },
     {
         element: '#tour-blog-table',
@@ -104,7 +124,11 @@ export const asesorSteps = [
     },
     {
         element: '#nav-consultas',
-        popover: { ...popoverConfig, title: 'Buzón de Mensajes', description: 'Aquí es donde se reciben los mensajes de tus clientes.', side: 'right', align: 'center' }
+        popover: { ...popoverConfig, title: 'Buzón de Mensajes', description: 'Aquí es donde se reciben los mensajes de tus clientes.', side: 'right', align: 'center' },
+        onHighlightStarted: () => {
+            openSidebarSection('Atención');
+            navigateTo('/dashboard/consultas');
+        }
     },
     {
         element: '#tour-consultas-table',
@@ -113,7 +137,11 @@ export const asesorSteps = [
     },
     {
         element: '#nav-whatsapp',
-        popover: { ...popoverConfig, title: 'Conexión Directa', description: 'Asegúrate de que la mensajería funcione conectando tu celular.', side: 'right', align: 'center' }
+        popover: { ...popoverConfig, title: 'Conexión Directa', description: 'Asegúrate de que la mensajería funcione conectando tu celular.', side: 'right', align: 'center' },
+        onHighlightStarted: () => {
+            openSidebarSection('Atención');
+            navigateTo('/dashboard/whatsapp');
+        }
     },
     {
         element: '#tour-whatsapp-card',
