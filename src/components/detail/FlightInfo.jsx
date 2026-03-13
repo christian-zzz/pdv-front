@@ -1,37 +1,38 @@
 import React, { useState } from 'react';
-import { getFeatureIcon } from '../../utils/featureIcons';
 
 /**
- * PackageInfo — Package highlights with icons + description + amenities.
+ * FlightInfo — Flight highlights with icons + description + amenities.
  *
- * @param {string}   accommodation — hotel/resort name
- * @param {string}   days          — e.g. "7 Noches"
- * @param {string}   guestType     — e.g. "Individual", "Pareja", "Familia"
- * @param {string}   boardType     — e.g. "Todo Incluido"
- * @param {string}   description   — long description text
- * @param {Array}    amenities     — [{ icon: ReactNode, label: string }]
+ * @param {string}   destination   — destination country/city
+ * @param {string}   requirementsShort  — short text for highlight grid
+ * @param {string}   guestType          — e.g. "Individual", "Pareja", "Familia"
+ * @param {string}   boardType          — e.g. "Todo Incluido", "Solo Desayuno"
+ * @param {string}   description        — long description text
+ * @param {Array}    requirements       — list of string requirements
+ * @param {Array}    amenities          — [{ icon: ReactNode, label: string }]
  */
-const PackageInfo = ({ accommodation, days, guestType, boardType, description, amenities = [] }) => {
+const FlightInfo = ({ destination, requirementsShort, guestType, boardType, description, requirements = [], amenities = [] }) => {
     const [expanded, setExpanded] = useState(false);
 
     const highlights = [
         {
             icon: (
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="w-6 h-6">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 21h19.5m-18-18v18m10.5-18v18m6-13.5V21M6.75 6.75h.75m-.75 3h.75m-.75 3h.75m3-6h.75m-.75 3h.75m-.75 3h.75M6.75 21v-3.375c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21M3 3h12m-.75 4.5H21m-3.75 3h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Zm0 3h.008v.008h-.008v-.008Z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
                 </svg>
             ),
-            label: 'Alojamiento',
-            value: accommodation,
+            label: 'Destino',
+            value: destination,
         },
         {
             icon: (
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="currentColor" className="w-6 h-6">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6.75 3v2.25M17.25 3v2.25M3 18.75V7.5a2.25 2.25 0 0 1 2.25-2.25h13.5A2.25 2.25 0 0 1 21 7.5v11.25m-18 0A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75m-18 0v-7.5A2.25 2.25 0 0 1 5.25 9h13.5A2.25 2.25 0 0 1 21 11.25v7.5" />
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-1.5A1.125 1.125 0 0 1 13.5 7.125v-1.5a3.375 3.375 0 0 0-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 0 0-9-9Z" />
                 </svg>
             ),
-            label: 'Días',
-            value: days,
+            label: 'Requisitos',
+            value: requirementsShort,
         },
         {
             icon: (
@@ -80,7 +81,7 @@ const PackageInfo = ({ accommodation, days, guestType, boardType, description, a
             {/* ── Description ─────────────────────────────────────── */}
             {description && (
                 <div>
-                    <h2 className="text-2xl font-bold text-[#001f6c] mb-4">Sobre el Paquete</h2>
+                    <h2 className="text-2xl font-bold text-[#001f6c] mb-4">Sobre el Vuelo</h2>
                     <p className="text-[15px] leading-relaxed text-gray-600 font-medium">{displayText}</p>
                     {isLong && (
                         <button
@@ -101,17 +102,36 @@ const PackageInfo = ({ accommodation, days, guestType, boardType, description, a
                 </div>
             )}
 
-            {/* ── Hotel & Amenities ──────────────────────────────── */}
+            {/* ── Travel Requirements ─────────────────────────────────────── */}
+            {requirements && requirements.length > 0 && (
+                <div>
+                    <h2 className="text-2xl font-bold text-[#001f6c] mb-4">Para ingresar a Colombia desde Venezuela</h2>
+                    <ul className="space-y-3">
+                        {requirements.map((req, i) => (
+                            <li key={i} className="flex items-start gap-3">
+                                <span className="shrink-0 mt-0.5 w-5 h-5 rounded-full bg-blue-50 text-[#ed6f00] flex items-center justify-center">
+                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-3.5 h-3.5">
+                                        <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 0 1 .143 1.052l-8 10.5a.75.75 0 0 1-1.127.075l-4.5-4.5a.75.75 0 0 1 1.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 0 1 1.05-.143Z" clipRule="evenodd" />
+                                    </svg>
+                                </span>
+                                <span className="text-[15px] text-gray-700 leading-snug">{req}</span>
+                            </li>
+                        ))}
+                    </ul>
+                </div>
+            )}
+
+            {/* ── Flight Amenities / Features ──────────────────────────────── */}
             {amenities.length > 0 && (
                 <div>
-                    <h2 className="text-2xl font-bold text-[#001f6c] mb-4">Caracteristicas del Hotel</h2>
+                    <h2 className="text-2xl font-bold text-[#001f6c] mb-4">Servicios Incluidos</h2>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                         {amenities.map((a, i) => (
                             <div
                                 key={i}
                                 className="flex items-center gap-2.5 bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 h-14 text-sm font-medium text-[#001f6c]/80"
                             >
-                                <span className="shrink-0 text-[#ed6f00]">{getFeatureIcon(a.icon)}</span>
+                                <span className="shrink-0 text-gray-400">{a.icon}</span>
                                 {a.label}
                             </div>
                         ))}
@@ -122,4 +142,4 @@ const PackageInfo = ({ accommodation, days, guestType, boardType, description, a
     );
 };
 
-export default PackageInfo;
+export default FlightInfo;

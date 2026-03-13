@@ -3,6 +3,8 @@ import Layout from './layouts/Layout';
 import DashboardLayout from './layouts/DashboardLayout';
 import Home from './pages/Home';
 import PackageDetail from './pages/PackageDetail';
+import FlightDetail from './pages/FlightDetail';
+import AccommodationDetail from './pages/AccommodationDetail';
 import Dashboard from './pages/Dashboard';
 import Paquetes from './pages/admin/Paquetes';
 import Vuelos from './pages/admin/Vuelos';
@@ -29,6 +31,14 @@ const router = createBrowserRouter([
             {
                 path: 'package/:id',
                 element: <PackageDetail />,
+            },
+            {
+                path: 'vuelo/:id',
+                element: <FlightDetail />,
+            },
+            {
+                path: 'hotel/:id',
+                element: <AccommodationDetail />,
             },
             {
                 path: 'login',

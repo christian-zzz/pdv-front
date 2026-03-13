@@ -5,22 +5,46 @@ import React, { useState } from 'react';
  *
  * @param {string} price          — formatted price, e.g. "$2,499"
  * @param {string} priceLabel     — e.g. "/ persona"
+ * @param {boolean} isFlight      — changes form behavior to suit flights
+ * @param {boolean} isAccommodation — changes form to suit accommodations
+ * @param {Array} roomTypes       — available room types for dropdown
  */
-const BookingForm = ({ price = '$0', priceLabel = '/ persona' }) => {
+const BookingForm = ({ price = '$0', priceLabel = '/ persona', isFlight = false, isAccommodation = false, roomTypes = [] }) => {
     const [form, setForm] = useState({
         name: '',
         email: '',
         phone: '',
         dateFrom: '',
         dateTo: '',
+        room: '',
         guests: 1,
         children: false,
+        kidsCount: 0,
+        returnFlight: false,
     });
 
     const update = (field) => (e) => {
         const val = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
-        setForm((prev) => ({ ...prev, [field]: val }));
+        setForm((prev) => {
+            const nextForm = { ...prev, [field]: val };
+            // if unchecking children, reset kidsCount to 0
+            if (field === 'children' && !val) {
+                nextForm.kidsCount = 0;
+            }
+            // if checking children, ensure kidsCount is at least 1
+            if (field === 'children' && val && nextForm.kidsCount === 0) {
+                nextForm.kidsCount = 1;
+            }
+            return nextForm;
+        });
     };
+
+    // Default the room selection if available
+    React.useEffect(() => {
+        if (isAccommodation && roomTypes.length > 0 && !form.room) {
+            setForm(prev => ({ ...prev, room: roomTypes[0].id }));
+        }
+    }, [isAccommodation, roomTypes, form.room]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
@@ -90,7 +114,7 @@ const BookingForm = ({ price = '$0', priceLabel = '/ persona' }) => {
                 <div className="grid grid-cols-2 gap-3">
                     <div>
                         <label className="block text-xs font-bold uppercase tracking-wide text-[#001f6c]/60 mb-1 pl-0.5">
-                            Desde
+                            {isFlight ? (form.returnFlight ? 'Fecha de Ida' : 'Fecha Vuelo') : 'Desde'}
                         </label>
                         <input
                             type="date"
@@ -100,25 +124,60 @@ const BookingForm = ({ price = '$0', priceLabel = '/ persona' }) => {
                             required
                         />
                     </div>
+                    {(!isFlight || form.returnFlight) && (
+                        <div>
+                            <label className="block text-xs font-bold uppercase tracking-wide text-[#001f6c]/60 mb-1 pl-0.5">
+                                {isFlight ? 'Fecha de Regreso' : 'Hasta'}
+                            </label>
+                            <input
+                                type="date"
+                                value={form.dateTo}
+                                onChange={update('dateTo')}
+                                className="w-full rounded-xl border border-gray-200 bg-gray-50/60 px-3 py-2.5 text-sm text-[#001f6c] outline-none focus:border-[#3b82f6] focus:ring-2 focus:ring-[#3b82f6]/20 transition-all"
+                                required={!isFlight || form.returnFlight}
+                            />
+                        </div>
+                    )}
+                </div>
+
+                {isFlight && (
+                    <div className="flex items-center pt-1 pb-2">
+                        <label className="flex items-center gap-2 cursor-pointer select-none">
+                            <input
+                                type="checkbox"
+                                checked={form.returnFlight}
+                                onChange={update('returnFlight')}
+                                className="h-4 w-4 rounded border-gray-300 text-[#3b82f6] focus:ring-[#3b82f6]/30"
+                            />
+                            <span className="text-sm font-medium text-[#001f6c]/70">Incluir vuelo de regreso</span>
+                        </label>
+                    </div>
+                )}
+
+                {/* Room Selection */}
+                {isAccommodation && roomTypes.length > 0 && (
                     <div>
                         <label className="block text-xs font-bold uppercase tracking-wide text-[#001f6c]/60 mb-1 pl-0.5">
-                            Hasta
+                            Tipo de Habitación
                         </label>
-                        <input
-                            type="date"
-                            value={form.dateTo}
-                            onChange={update('dateTo')}
-                            className="w-full rounded-xl border border-gray-200 bg-gray-50/60 px-3 py-2.5 text-sm text-[#001f6c] outline-none focus:border-[#3b82f6] focus:ring-2 focus:ring-[#3b82f6]/20 transition-all"
+                        <select
+                            value={form.room}
+                            onChange={update('room')}
+                            className="w-full rounded-xl border border-gray-200 bg-gray-50/60 px-3 py-2.5 text-sm text-[#001f6c] outline-none focus:border-[#3b82f6] focus:ring-2 focus:ring-[#3b82f6]/20 transition-all appearance-none"
                             required
-                        />
+                        >
+                            {roomTypes.map(rt => (
+                                <option key={rt.id} value={rt.id}>{rt.name}</option>
+                            ))}
+                        </select>
                     </div>
-                </div>
+                )}
 
                 {/* Guests + Children */}
                 <div className="grid grid-cols-2 gap-3 items-end">
                     <div>
                         <label className="block text-xs font-bold uppercase tracking-wide text-[#001f6c]/60 mb-1 pl-0.5">
-                            Nº de Personas
+                            Nº de Adultos
                         </label>
                         <input
                             type="number"
@@ -129,15 +188,46 @@ const BookingForm = ({ price = '$0', priceLabel = '/ persona' }) => {
                             className="w-full rounded-xl border border-gray-200 bg-gray-50/60 px-4 py-2.5 text-sm text-[#001f6c] outline-none focus:border-[#3b82f6] focus:ring-2 focus:ring-[#3b82f6]/20 transition-all"
                         />
                     </div>
-                    <label className="flex items-center gap-2 pb-2.5 cursor-pointer select-none">
-                        <input
-                            type="checkbox"
-                            checked={form.children}
-                            onChange={update('children')}
-                            className="h-4 w-4 rounded border-gray-300 text-[#3b82f6] focus:ring-[#3b82f6]/30"
-                        />
-                        <span className="text-sm font-medium text-[#001f6c]/70">Incluye niños</span>
-                    </label>
+
+                    <div>
+                        {form.children ? (
+                            <>
+                                <label className="block text-xs font-bold uppercase tracking-wide text-[#001f6c]/60 mb-1 pl-0.5">
+                                    Nº de Niños
+                                </label>
+                                <div className="flex relative">
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        max="10"
+                                        value={form.kidsCount}
+                                        onChange={update('kidsCount')}
+                                        className="w-full rounded-xl border border-gray-200 bg-gray-50/60 px-4 py-2.5 pr-8 text-sm text-[#001f6c] outline-none focus:border-[#3b82f6] focus:ring-2 focus:ring-[#3b82f6]/20 transition-all"
+                                    />
+                                    <button
+                                        type="button"
+                                        onClick={() => update('children')({ target: { type: 'checkbox', checked: false } })}
+                                        className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500 transition-colors"
+                                        title="Quitar niños"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </>
+                        ) : (
+                            <label className="flex items-center gap-2 pb-2.5 cursor-pointer select-none">
+                                <input
+                                    type="checkbox"
+                                    checked={form.children}
+                                    onChange={update('children')}
+                                    className="h-4 w-4 rounded border-gray-300 text-[#3b82f6] focus:ring-[#3b82f6]/30"
+                                />
+                                <span className="text-sm font-medium text-[#001f6c]/70">Incluye niños</span>
+                            </label>
+                        )}
+                    </div>
                 </div>
 
                 {/* Submit */}

@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 
 /**
  * AdminTable — Generic reusable data table for admin modules.
@@ -27,8 +27,39 @@ const AdminTable = ({
     onExtra,
 }) => {
     const [page, setPage] = useState(1);
-    const totalPages = Math.max(1, Math.ceil(data.length / pageSize));
-    const paginated = data.slice((page - 1) * pageSize, page * pageSize);
+    const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
+
+    const sortedData = useMemo(() => {
+        let sortableItems = [...data];
+        if (sortConfig.key !== null) {
+            sortableItems.sort((a, b) => {
+                const getVal = (obj, path) => path.split('.').reduce((acc, part) => acc && acc[part], obj);
+                const aVal = getVal(a, sortConfig.key);
+                const bVal = getVal(b, sortConfig.key);
+
+                // Handle null/undefined
+                if (aVal == null && bVal == null) return 0;
+                if (aVal == null) return sortConfig.direction === 'asc' ? -1 : 1;
+                if (bVal == null) return sortConfig.direction === 'asc' ? 1 : -1;
+
+                if (aVal < bVal) return sortConfig.direction === 'asc' ? -1 : 1;
+                if (aVal > bVal) return sortConfig.direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+        return sortableItems;
+    }, [data, sortConfig]);
+
+    const handleSort = (key) => {
+        let direction = 'asc';
+        if (sortConfig.key === key && sortConfig.direction === 'asc') {
+            direction = 'desc';
+        }
+        setSortConfig({ key, direction });
+    };
+
+    const totalPages = Math.max(1, Math.ceil(sortedData.length / pageSize));
+    const paginated = sortedData.slice((page - 1) * pageSize, page * pageSize);
 
     // Build a compact page list: [1, 2, 3, '...', N]
     const pageNumbers = () => {
@@ -67,9 +98,18 @@ const AdminTable = ({
                                 {columns.map((col) => (
                                     <th
                                         key={col.key}
-                                        className="px-4 py-3 text-center text-xs font-bold text-[#001f6c] uppercase tracking-wider whitespace-nowrap"
+                                        onClick={() => col.sortable && handleSort(col.key)}
+                                        className={`px-4 py-3 text-center text-xs font-bold text-[#001f6c] uppercase tracking-wider whitespace-nowrap ${col.sortable ? 'cursor-pointer hover:bg-[#ed6f00]/10 transition-colors select-none' : ''}`}
                                     >
-                                        {col.label}
+                                        <div className="flex items-center justify-center gap-1">
+                                            {col.label}
+                                            {col.sortable && (
+                                                <span className="flex flex-col opacity-50 text-[8px] leading-[4px]">
+                                                    <span className={sortConfig.key === col.key && sortConfig.direction === 'asc' ? 'text-[#ed6f00] opacity-100' : ''}>▲</span>
+                                                    <span className={sortConfig.key === col.key && sortConfig.direction === 'desc' ? 'text-[#ed6f00] opacity-100' : ''}>▼</span>
+                                                </span>
+                                            )}
+                                        </div>
                                     </th>
                                 ))}
                                 <th className="px-4 py-3 text-center text-xs font-bold text-[#001f6c] uppercase tracking-wider">
@@ -96,7 +136,7 @@ const AdminTable = ({
                                     {columns.map((col) => (
                                         <td
                                             key={col.key}
-                                            className="px-4 py-3 text-center text-[#001f6c] align-middle"
+                                            className={col.tdClass ?? 'px-4 py-3 text-center text-[#001f6c] align-middle'}
                                         >
                                             {col.render
                                                 ? col.render(row[col.key], row)
@@ -166,8 +206,8 @@ const AdminTable = ({
                                     key={n}
                                     onClick={() => setPage(n)}
                                     className={`w-7 h-7 rounded-lg text-sm font-semibold transition-colors duration-200 ${page === n
-                                            ? 'bg-[#001f6c] text-white'
-                                            : 'text-[#001f6c] hover:bg-[#001f6c]/10'
+                                        ? 'bg-[#001f6c] text-white'
+                                        : 'text-[#001f6c] hover:bg-[#001f6c]/10'
                                         }`}
                                 >
                                     {n}

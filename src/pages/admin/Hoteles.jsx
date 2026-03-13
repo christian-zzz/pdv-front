@@ -1,194 +1,493 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../api/axios';
 import AdminTable from '../../components/dashboard/AdminTable';
-import FormCard, { FormInput, FormSelect, FormMultiSelect, FormDynamicList, FormPlaceSearch, FormTextarea, FormCheckbox, ImageSlot } from '../../components/dashboard/FormCard';
+import FormCard, {
+    FormInput,
+    FormSelect,
+    FormSelectCreatable,
+    FormMultiSelect,
+    FormFeatureList,
+    FormPlaceSearch,
+    FormTextarea,
+    FormCheckbox,
+} from '../../components/dashboard/FormCard';
 
-const Thumb = ({ image, initials = '' }) => (
-    <div className="flex items-center justify-center">
-        <div className="w-16 h-12 rounded-lg flex items-center justify-center text-white text-[10px] font-bold leading-tight text-center"
-            style={{ background: `linear-gradient(135deg, #001f6c, #001f6ccc)` }}>
-            {image ? <img src={image} alt="Thumbnail" className="w-full h-full object-cover rounded-lg" /> : initials}
-        </div>
+// ── Board-type Spanish label map (DB stores English keys) ────────────────────
+const BOARD_TYPE_ES = {
+    'All Inclusive': 'Todo Incluido',
+    'Breakfast Only': 'Solo Desayuno',
+    'Half Board': 'Media Pensión',
+    'Full Board': 'Pensión Completa',
+    'Room Only': 'Solo Habitación',
+    'No Meals': 'Sin Comidas',
+};
+const boardLabel = (type) => BOARD_TYPE_ES[type] ?? type;
+
+// ── Thumbnail cell ────────────────────────────────────────────────────────────
+const Thumb = ({ image }) => (
+    <div className="w-16 h-16 rounded-xl overflow-hidden shadow-sm shrink-0 mx-auto"
+        style={{ background: 'linear-gradient(135deg, #001f6c, #001f6ccc)' }}>
+        {image
+            ? <img src={image} alt="" className="w-full h-full object-cover" />
+            : <div className="w-full h-full flex items-center justify-center text-white text-xs font-bold">HT</div>}
     </div>
 );
 
-// DATA array is removed as per the instruction's implied new data structure and API usage.
-// If mock data is still needed, it should be provided in the new format.
+// ── Regime cell ───────────────────────────────────────────────────────────────
+const RegimeCell = ({ row }) => {
+    const rawBoard = typeof row.board_type === 'object' ? row.board_type?.type : row.board_type;
+    const regime = boardLabel(rawBoard) || row.boardType?.type || row.boardType?.name || '—';
+    return (
+        <span className="inline-flex items-center gap-1 text-[11px] font-semibold text-[#001f6c] bg-[#f4f7fb] px-2.5 py-1 rounded-full border border-[#001f6c]/10 whitespace-nowrap">
+            🍽 {regime}
+        </span>
+    );
+};
 
+// ── Stats cell (tipos + servicios horizontal) ─────────────────────────────────
+const StatsCell = ({ row }) => {
+    const roomCount = (row.room_types ?? row.roomTypes)?.length ?? 0;
+    const serviceCount = Array.isArray(row.features) ? row.features.length : 0;
+    return (
+        <div className="flex flex-wrap justify-center gap-1.5">
+            <span className="inline-flex items-center gap-1 text-[11px] text-[#001f6c]/70 bg-[#f4f7fb] px-2 py-0.5 rounded-full border border-[#001f6c]/10 whitespace-nowrap">
+                🛏 {roomCount} tipo{roomCount !== 1 ? 's' : ''}
+            </span>
+            <span className="inline-flex items-center gap-1 text-[11px] text-[#001f6c]/70 bg-[#f4f7fb] px-2 py-0.5 rounded-full border border-[#001f6c]/10 whitespace-nowrap">
+                ✨ {serviceCount} serv.
+            </span>
+        </div>
+    );
+};
+
+// ── Table columns ─────────────────────────────────────────────────────────────
 const COLUMNS = [
-    { key: 'thumb', label: 'Portada', render: (v, item) => <Thumb image={item.post?.thumbnail || item.post?.banner} initials="HT" /> },
-    { key: 'post.name', label: 'Nombre' },
-    { key: 'destination', label: 'Ubicación' },
-    { key: 'stars', label: 'Categoría', render: (v) => `${v} ★` },
-    { key: 'starting_price', label: 'Precio ($)' },
-    { key: 'roomTypes', label: 'Habitaciones', render: (v, item) => item.roomTypes?.map(r => r.type).join(', ') || 'N/A' },
-    { key: 'isActive', label: 'Activo', render: (v) => v ? 'Sí' : 'No' },
+    { key: 'thumb', label: 'Portada', tdClass: 'px-3 py-2 align-middle w-24', render: (_, row) => <Thumb image={row.post?.thumbnail || row.post?.banner} /> },
+    { key: 'post.name', label: 'Nombre', sortable: true },
+    { key: 'destination', label: 'Ubicación', sortable: true },
+    { key: 'stars', label: 'Cat.', sortable: true, render: (v) => `${v} ★` },
+    { key: 'starting_price', label: 'Precio/Noche ($)', sortable: true },
+    { key: 'regime', label: 'Régimen', render: (_, row) => <RegimeCell row={row} /> },
+    { key: 'stats', label: 'Servicios', render: (_, row) => <StatsCell row={row} /> },
+    { key: 'isActive', label: 'Activo', sortable: true, render: (v) => v ? '✅' : '❌' },
 ];
 
-const HotelForm = ({ lookups, onCreated }) => {
-    const defaultForm = {
-        name: '',
-        destination: '',
-        map_location: '',
-        stars: '',
-        starting_price: '',
-        board_type_FK: '',
-        room_types: [], // Now an array for many-to-many
-        overview: '',
-        information: '',
-        features: '',
-        banner: '',
-        thumbnail: '',
-        imagesString: '', // comma-separated
-        isActive: true,
-    };
-    const [form, setForm] = useState(defaultForm);
+// ── Steps configuration ───────────────────────────────────────────────────────
+const STEPS = [
+    { id: 1, label: 'General', icon: '🏨' },
+    { id: 2, label: 'Imágenes', icon: '🖼️' },
+    { id: 3, label: 'Contenido', icon: '📝' },
+];
+
+// ── Default empty form ────────────────────────────────────────────────────────
+const defaultForm = () => ({
+    name: '',
+    destination: '',
+    map_location: '',
+    stars: '',
+    starting_price: '',
+    board_type_FK: '',
+    room_types: [],
+    isActive: true,
+    banner: '',
+    thumbnail: '',
+    images: [],
+    overview: '',
+    information: '',
+    features: [],
+});
+
+// ── Step indicator ────────────────────────────────────────────────────────────
+const StepIndicator = ({ current, total }) => (
+    <div className="flex items-center gap-0 mb-6">
+        {STEPS.map((step, idx) => {
+            const done = step.id < current;
+            const active = step.id === current;
+            const last = idx === STEPS.length - 1;
+            return (
+                <React.Fragment key={step.id}>
+                    <div className="flex flex-col items-center gap-1 min-w-[70px]">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all
+                            ${done ? 'bg-[#ed6f00] border-[#ed6f00] text-white' : ''}
+                            ${active ? 'bg-[#001f6c] border-[#001f6c] text-white ring-4 ring-[#001f6c]/20' : ''}
+                            ${!done && !active ? 'bg-white border-gray-200 text-gray-400' : ''}
+                        `}>
+                            {done ? (
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
+                                    strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                </svg>
+                            ) : step.id}
+                        </div>
+                        <span className={`text-[11px] font-semibold text-center leading-tight
+                            ${active ? 'text-[#001f6c]' : ''}
+                            ${done ? 'text-[#ed6f00]' : ''}
+                            ${!done && !active ? 'text-gray-400' : ''}
+                        `}>
+                            {step.label}
+                        </span>
+                    </div>
+                    {!last && (
+                        <div className={`flex-1 h-0.5 mb-4 mx-1 rounded transition-all ${done ? 'bg-[#ed6f00]' : 'bg-gray-200'}`} />
+                    )}
+                </React.Fragment>
+            );
+        })}
+    </div>
+);
+
+// ── Hotel Form ────────────────────────────────────────────────────────────────
+const HotelForm = ({ lookups, editRow, onSaved, onCancelEdit }) => {
+    const [step, setStep] = useState(1);
+    const [form, setForm] = useState(defaultForm());
+    const [saving, setSaving] = useState(false);
+    const isEditing = !!editRow;
+
+    // Pre-fill when editRow changes
+    useEffect(() => {
+        if (editRow) {
+            setForm({
+                name: editRow.post?.name || '',
+                destination: editRow.destination || '',
+                map_location: editRow.map_location || '',
+                stars: String(editRow.stars || ''),
+                starting_price: String(editRow.starting_price || ''),
+                board_type_FK: editRow.board_type_FK != null ? String(editRow.board_type_FK) : '',
+                room_types: (editRow.roomTypes || []).map(r => r.room_type_ID),
+                isActive: editRow.isActive ?? true,
+                banner: editRow.post?.banner || '',
+                thumbnail: editRow.post?.thumbnail || '',
+                images: (editRow.post?.images || []).map(i => i.url),
+                overview: editRow.post?.overview || '',
+                information: editRow.post?.information || '',
+                features: Array.isArray(editRow.features) ? editRow.features : [],
+            });
+        } else {
+            setForm(defaultForm());
+        }
+        setStep(1);
+    }, [editRow]);
 
     const set = (k) => (e) =>
-        setForm((f) => ({ ...f, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }));
+        setForm(f => ({ ...f, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }));
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const galleryValue = form.images.join('\n');
+    const handleGallery = (e) => {
+        const urls = e.target.value.split('\n').map(s => s.trim()).filter(Boolean);
+        setForm(f => ({ ...f, images: urls }));
+    };
+
+    const handleSubmit = async () => {
+        setSaving(true);
+        const payload = {
+            ...form,
+            stars: parseInt(form.stars, 10),
+            starting_price: parseFloat(form.starting_price),
+            board_type_FK: form.board_type_FK || null,
+            images: form.images.filter(Boolean),
+        };
         try {
-            const response = await api.post('/accommodations', form);
-            alert('Alojamiento creado exitosamente!');
-            setForm(defaultForm);
-            if (onCreated) onCreated();
-        } catch (error) {
-            console.error('Error creating accommodation:', error);
-            alert('Error al crear el alojamiento.');
+            if (isEditing) {
+                await api.put(`/accommodations/${editRow.accommodation_ID}`, payload);
+                alert('Alojamiento actualizado exitosamente!');
+            } else {
+                await api.post('/accommodations', payload);
+                alert('Alojamiento creado exitosamente!');
+            }
+            setForm(defaultForm());
+            setStep(1);
+            if (onSaved) onSaved();
+        } catch (err) {
+            console.error('Error saving accommodation:', err);
+            alert('Error al guardar el alojamiento.');
+        } finally {
+            setSaving(false);
         }
     };
 
     const handleCreateRoomType = async (newType) => {
         try {
             const res = await api.post('/lookups/room-types', { type: newType });
-            // Let the parent re-fetch lookups, or we can Optimistically update
-            if (onCreated) onCreated();
-            // Also select it immediately
             setForm(f => ({ ...f, room_types: [...f.room_types, res.data.room_type_ID] }));
+            if (onSaved) onSaved();
         } catch (err) {
-            console.error('Error creating room type', err);
             alert('Error al crear tipo de habitación.');
         }
     };
 
+    const handleCreateBoardType = async (newType) => {
+        try {
+            const res = await api.post('/lookups/board-types', { type: newType });
+            // Auto-select the newly created board type
+            setForm(f => ({ ...f, board_type_FK: String(res.data.board_type_ID) }));
+            if (onSaved) onSaved();
+        } catch (err) {
+            alert('Error al crear régimen.');
+        }
+    };
+
+    const handleCancel = () => { setForm(defaultForm()); setStep(1); onCancelEdit(); };
+
     return (
-        <FormCard title="Crear un Nuevo Hotel" onSubmit={handleSubmit} submitLabel="Crear Hotel">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                    <FormInput label="Nombre del Hotel" id="ht-nombre" value={form.name} onChange={set('name')} required />
-                    <FormInput label="Ubicación / Ciudad" id="ht-ubicacion" value={form.destination} onChange={set('destination')} required />
-                    <div className="grid grid-cols-2 gap-3">
-                        <FormSelect label="Categoría (★)" id="ht-categoria"
-                            options={[
-                                { value: '1', label: '1 ★' },
-                                { value: '2', label: '2 ★' },
-                                { value: '3', label: '3 ★' },
-                                { value: '4', label: '4 ★' },
-                                { value: '5', label: '5 ★' }
-                            ]}
-                            value={form.stars} onChange={set('stars')} required
-                        />
-                        <FormInput label="Precio / Noche ($)" id="ht-precio" type="number" min="0" step="0.01" value={form.starting_price} onChange={set('starting_price')} required />
+        <div id="form-hotel">
+            {/* Edit mode banner */}
+            {isEditing && (
+                <div className="mb-3 flex items-center justify-between bg-amber-50 border border-amber-300 rounded-xl px-5 py-3">
+                    <div className="flex items-center gap-2 text-amber-700 font-semibold text-sm">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
+                        </svg>
+                        Editando: <span className="font-bold">{editRow?.post?.name}</span>
                     </div>
+                    <button type="button" onClick={handleCancel}
+                        className="text-sm text-amber-700 hover:text-red-600 font-bold underline transition-colors">
+                        Cancelar edición
+                    </button>
+                </div>
+            )}
 
-                    <div className="mt-3">
-                        <FormPlaceSearch
-                            label="Ubicación Maps (Ej. Hesperia Isla Margarita)"
-                            id="ht-map_location"
-                            value={form.map_location}
-                            onChange={set('map_location')}
-                            category="hotel"
-                        />
-                    </div>
-
-                    <div className="mt-3">
-                        <FormSelect label="Régimen (Opcional)" id="ht-board"
-                            options={lookups.boardTypes.map(b => ({ value: b.board_type_ID, label: b.type }))}
-                            value={form.board_type_FK} onChange={set('board_type_FK')}
-                        />
-                    </div>
-
-                    <FormMultiSelect
-                        label="Tipos de Habitación (Múltiple)" id="ht-room"
-                        options={lookups.roomTypes.map(r => ({ value: r.room_type_ID, label: r.type }))}
-                        value={form.room_types}
-                        onChange={(selectedArray) => setForm(f => ({ ...f, room_types: selectedArray }))}
-                        onCreateOption={handleCreateRoomType}
-                    />
+            <div className="bg-white rounded-2xl border border-[#ed6f00] shadow-sm overflow-visible">
+                {/* Header */}
+                <div className="bg-[#f4f7fb] border-b border-[#ed6f00]/30 px-6 py-4">
+                    <h2 className="text-lg font-extrabold text-[#001f6c]">
+                        {isEditing ? 'Editar Hotel' : 'Crear un Nuevo Hotel'}
+                    </h2>
                 </div>
 
-                <div className="space-y-4">
+                <div className="p-6">
+                    {/* Step indicator */}
+                    <StepIndicator current={step} total={STEPS.length} />
+
                     <div>
-                        <p className="text-xs font-semibold text-[#001f6c] mb-2">Banner del Hotel</p>
-                        <ImageSlot large />
-                    </div>
-                    <div className="flex gap-4">
-                        <div>
-                            <p className="text-xs font-semibold text-[#001f6c] mb-2">Thumbnail</p>
-                            <ImageSlot />
-                        </div>
-                        <div>
-                            <p className="text-xs font-semibold text-[#001f6c] mb-2">Galería</p>
-                            <div className="grid grid-cols-2 gap-1.5">
-                                <ImageSlot /><ImageSlot /><ImageSlot />
-                                <label className="h-20 w-20 flex items-center justify-center rounded-xl border-2 border-dashed border-[#ed6f00]/50 bg-[#f4f7fb] cursor-pointer hover:border-[#ed6f00] transition-colors text-2xl text-[#ed6f00] font-bold">
-                                    +<input type="file" accept="image/*" multiple className="hidden" />
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
+                        {/* ── Step 1: General Info ─────────────────────────── */}
+                        {step === 1 && (
+                            <div className="space-y-4 animate-in fade-in slide-in-from-right-4 duration-200">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                    <FormInput label="Nombre del Hotel" id="ht-nombre"
+                                        value={form.name} onChange={set('name')} required />
+                                    <FormInput label="Ubicación / Ciudad" id="ht-ubicacion"
+                                        value={form.destination} onChange={set('destination')} required />
+                                </div>
 
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-4">
-                <div className="space-y-4">
-                    <FormTextarea label="Descripción del Hotel (Overview)" id="ht-desc" rows={4} value={form.overview} onChange={set('overview')} />
-                    <FormTextarea label="Información Completa" id="ht-info" rows={4} value={form.information} onChange={set('information')} />
-                </div>
-                <div>
-                    <FormDynamicList
-                        label="Servicios y Amenidades"
-                        id="ht-servicios"
-                        value={form.features}
-                        onChange={(val) => setForm(f => ({ ...f, features: val }))}
-                        placeholder="Ej: Wi-Fi Gratis, Piscina, Desayuno..."
-                    />
+                                <div className="grid grid-cols-2 gap-4">
+                                    <FormSelect label="Categoría (★)" id="ht-categoria"
+                                        options={[
+                                            { value: '1', label: '1 ★' },
+                                            { value: '2', label: '2 ★' },
+                                            { value: '3', label: '3 ★' },
+                                            { value: '4', label: '4 ★' },
+                                            { value: '5', label: '5 ★' },
+                                        ]}
+                                        value={form.stars} onChange={set('stars')} required />
+                                    <FormInput label="Precio / Noche ($)" id="ht-precio"
+                                        type="number" min="0" step="0.01"
+                                        value={form.starting_price} onChange={set('starting_price')} required />
+                                </div>
+
+                                <FormPlaceSearch
+                                    label="Ubicación en Maps"
+                                    id="ht-map_location"
+                                    value={form.map_location}
+                                    onChange={set('map_location')}
+                                    category="hotel"
+                                />
+
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                    <FormSelectCreatable label="Régimen (Opcional)" id="ht-board"
+                                        options={lookups.boardTypes.map(b => ({ value: b.board_type_ID, label: boardLabel(b.type) }))}
+                                        value={form.board_type_FK} onChange={set('board_type_FK')}
+                                        onCreateOption={handleCreateBoardType} />
+                                    <FormMultiSelect
+                                        label="Tipos de Habitación" id="ht-room"
+                                        options={lookups.roomTypes.map(r => ({ value: r.room_type_ID, label: r.type }))}
+                                        value={form.room_types}
+                                        onChange={(arr) => setForm(f => ({ ...f, room_types: arr }))}
+                                        onCreateOption={handleCreateRoomType}
+                                    />
+                                </div>
+
+                                <FormCheckbox label="Hotel Activo" id="ht-activo"
+                                    checked={form.isActive} onChange={set('isActive')} />
+                            </div>
+                        )}
+
+                        {/* ── Step 2: Images ───────────────────────────────── */}
+                        {step === 2 && (
+                            <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-200">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                    <div className="space-y-4">
+                                        <FormInput label="URL del Banner" id="ht-banner"
+                                            type="url" placeholder="https://..."
+                                            value={form.banner} onChange={set('banner')} />
+                                        <FormInput label="URL del Thumbnail" id="ht-thumbnail"
+                                            type="url" placeholder="https://..."
+                                            value={form.thumbnail} onChange={set('thumbnail')} />
+                                    </div>
+                                    <div className="space-y-2">
+                                        {/* Live preview */}
+                                        {(form.banner || form.thumbnail) && (
+                                            <div className="flex gap-3 mb-2">
+                                                {form.banner && (
+                                                    <div className="flex-1">
+                                                        <p className="text-[10px] font-semibold text-[#001f6c]/60 uppercase mb-1">Banner</p>
+                                                        <img src={form.banner} alt="Banner preview"
+                                                            className="w-full h-24 object-cover rounded-lg border border-gray-200"
+                                                            onError={(e) => { e.target.style.display = 'none'; }} />
+                                                    </div>
+                                                )}
+                                                {form.thumbnail && (
+                                                    <div className="w-24">
+                                                        <p className="text-[10px] font-semibold text-[#001f6c]/60 uppercase mb-1">Thumbnail</p>
+                                                        <img src={form.thumbnail} alt="Thumbnail preview"
+                                                            className="w-24 h-24 object-cover rounded-lg border border-gray-200"
+                                                            onError={(e) => { e.target.style.display = 'none'; }} />
+                                                    </div>
+                                                )}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                <div className="flex flex-col gap-1">
+                                    <label htmlFor="ht-images" className="text-xs font-semibold text-[#001f6c]">
+                                        URLs de Galería{' '}
+                                        <span className="font-normal text-gray-400">(una URL por línea)</span>
+                                    </label>
+                                    <textarea
+                                        id="ht-images"
+                                        rows={6}
+                                        value={galleryValue}
+                                        onChange={handleGallery}
+                                        placeholder={"https://imagen1.jpg\nhttps://imagen2.jpg\nhttps://imagen3.jpg"}
+                                        className="w-full rounded-lg border border-[#ed6f00]/50 bg-white px-3 py-2 text-sm text-[#001f6c] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ed6f00]/40 transition resize-y font-mono"
+                                    />
+                                    <p className="text-[11px] text-gray-400">{form.images.length} imagen(es) en galería</p>
+                                </div>
+
+                                {/* Gallery preview chips */}
+                                {form.images.length > 0 && (
+                                    <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
+                                        {form.images.map((url, i) => (
+                                            <img key={i} src={url} alt={`Galería ${i + 1}`}
+                                                className="h-16 w-full object-cover rounded-lg border border-gray-200"
+                                                onError={(e) => { e.target.style.opacity = '0.3'; }} />
+                                        ))}
+                                    </div>
+                                )}
+                            </div>
+                        )}
+
+                        {/* ── Step 3: Content & Features ───────────────────── */}
+                        {step === 3 && (
+                            <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-200">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                                    <div className="space-y-4">
+                                        <FormTextarea
+                                            label="Resumen corto (para tarjetas y listados)"
+                                            id="ht-overview" rows={3}
+                                            value={form.overview} onChange={set('overview')}
+                                            placeholder="Breve descripción visible en tarjetas..."
+                                        />
+                                        <FormTextarea
+                                            label="Descripción completa (página de detalle)"
+                                            id="ht-info" rows={6}
+                                            value={form.information} onChange={set('information')}
+                                            placeholder="Descripción completa del hotel..."
+                                        />
+                                    </div>
+                                    <FormFeatureList
+                                        label="Servicios y Amenidades"
+                                        id="ht-features"
+                                        value={form.features}
+                                        onChange={(arr) => setForm(f => ({ ...f, features: arr }))}
+                                    />
+                                </div>
+                            </div>
+                        )}
+
+                        {/* ── Navigation buttons ───────────────────────────── */}
+                        <div className="flex items-center justify-between mt-8 pt-5 border-t border-gray-100">
+                            <button
+                                type="button"
+                                onClick={() => setStep(s => Math.max(1, s - 1))}
+                                disabled={step === 1}
+                                className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-[#001f6c]/60 hover:border-[#001f6c]/30 hover:text-[#001f6c] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                            >
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
+                                </svg>
+                                Anterior
+                            </button>
+
+                            <div className="flex items-center gap-2">
+                                {STEPS.map(s => (
+                                    <button key={s.id} type="button"
+                                        onClick={() => setStep(s.id)}
+                                        className={`w-2 h-2 rounded-full transition-all ${step === s.id ? 'bg-[#001f6c] w-4' : step > s.id ? 'bg-[#ed6f00]' : 'bg-gray-200'}`}
+                                    />
+                                ))}
+                            </div>
+
+                            {step < STEPS.length ? (
+                                <button
+                                    type="button"
+                                    onClick={() => setStep(s => Math.min(STEPS.length, s + 1))}
+                                    className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#001f6c] text-white text-sm font-semibold hover:bg-[#001f6c]/90 transition-all shadow-sm"
+                                >
+                                    Siguiente
+                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
+                                    </svg>
+                                </button>
+                            ) : (
+                                <button
+                                    type="button"
+                                    onClick={handleSubmit}
+                                    disabled={saving}
+                                    className="flex items-center gap-2 px-8 py-2.5 rounded-xl bg-[#ed6f00] text-white text-sm font-bold hover:bg-[#ed6f00]/90 disabled:opacity-60 disabled:cursor-not-allowed transition-all shadow-sm"
+                                >
+                                    {saving ? (
+                                        <>
+                                            <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                                            Guardando...
+                                        </>
+                                    ) : (
+                                        <>
+                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
+                                                <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
+                                            </svg>
+                                            {isEditing ? 'Guardar Cambios' : 'Crear Hotel'}
+                                        </>
+                                    )}
+                                </button>
+                            )}
+                        </div>
+                    </div>
                 </div>
             </div>
-            <div className="flex gap-6">
-                <FormCheckbox label="Hotel Activo" id="ht-activo" checked={form.isActive} onChange={set('isActive')} />
-            </div>
-        </FormCard>
+        </div>
     );
 };
 
+// ── Page ──────────────────────────────────────────────────────────────────────
 const Hoteles = () => {
     const [accommodations, setAccommodations] = useState([]);
-    const [lookups, setLookups] = useState({ guestTypes: [], boardTypes: [], roomTypes: [] });
+    const [lookups, setLookups] = useState({ boardTypes: [], roomTypes: [] });
     const [loading, setLoading] = useState(true);
+    const [editRow, setEditRow] = useState(null);
 
     const fetchData = async () => {
         try {
             setLoading(true);
             const [accRes, lookupsRes] = await Promise.all([
                 api.get('/accommodations'),
-                api.get('/lookups')
+                api.get('/lookups'),
             ]);
-
-            const flatAccs = accRes.data.map(acc => ({
-                ...acc,
-                'post.name': acc.post?.name,
-                'board_type.name': acc.boardType?.type,
-            }));
-
-            setAccommodations(flatAccs);
-
+            const flat = accRes.data.map(acc => ({ ...acc, 'post.name': acc.post?.name }));
+            setAccommodations(flat);
             setLookups({
-                guestTypes: lookupsRes.data.guest_types || [],
                 boardTypes: lookupsRes.data.board_types || [],
-                roomTypes: lookupsRes.data.room_types || []
+                roomTypes: lookupsRes.data.room_types || [],
             });
         } catch (err) {
             console.error('Error fetching accommodations:', err);
@@ -197,28 +496,53 @@ const Hoteles = () => {
         }
     };
 
-    useEffect(() => {
-        fetchData();
-    }, []);
+    useEffect(() => { fetchData(); }, []);
+
+    const handleEdit = (row) => {
+        setEditRow(row);
+        setTimeout(() => {
+            document.getElementById('form-hotel')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }, 50);
+    };
+
+    const handleArchive = async (row) => {
+        const name = row['post.name'] || row.post?.name || 'este alojamiento';
+        if (!window.confirm(`¿Eliminar "${name}"? Esta acción no se puede deshacer.`)) return;
+        try {
+            await api.delete(`/accommodations/${row.accommodation_ID}`);
+            fetchData();
+        } catch (err) {
+            console.error('Error deleting accommodation:', err);
+            alert('Error al eliminar el alojamiento.');
+        }
+    };
 
     return (
         <div className="p-6 space-y-8 animate-in fade-in duration-300">
             {loading ? (
-                <div className="flex justify-center p-10"><div className="animate-spin h-8 w-8 border-b-2 border-[#ed6f00] rounded-full"></div></div>
+                <div className="flex justify-center p-10">
+                    <div className="animate-spin h-8 w-8 border-b-2 border-[#ed6f00] rounded-full" />
+                </div>
             ) : (
                 <AdminTable
-                    title="Alojamientos API"
+                    title="Alojamientos"
                     newLabel="+ Nuevo Alojamiento"
                     columns={COLUMNS}
                     data={accommodations}
                     pageSize={10}
-                    onNew={() => document.getElementById('form-hotel')?.scrollIntoView({ behavior: 'smooth' })}
+                    onNew={() => { setEditRow(null); document.getElementById('form-hotel')?.scrollIntoView({ behavior: 'smooth' }); }}
                     onView={(row) => alert(`Vista previa: ${row['post.name']}`)}
-                    onEdit={(row) => alert(`Editar funcionalidad en proceso: ${row['post.name']}`)}
-                    onArchive={(row) => alert(`Archivar funcionalidad en proceso: ${row['post.name']}`)}
+                    onEdit={handleEdit}
+                    onArchive={handleArchive}
                 />
             )}
-            <div id="form-hotel"><HotelForm lookups={lookups} onCreated={fetchData} /></div>
+
+            <HotelForm
+                lookups={lookups}
+                editRow={editRow}
+                onSaved={() => { setEditRow(null); fetchData(); }}
+                onCancelEdit={() => setEditRow(null)}
+            />
         </div>
     );
 };

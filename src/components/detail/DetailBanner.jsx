@@ -1,13 +1,13 @@
 import React from 'react';
 import bannerImg from '../../assets/bannerdetail.jpg';
 
-const DetailBanner = () => {
+const DetailBanner = ({ image = bannerImg }) => {
     return (
         <div className="w-full">
             <img
-                src={bannerImg}
+                src={image}
                 alt="Banner"
-                className="w-full h-auto object-cover"
+                className="w-full h-auto object-cover max-h-[400px]"
             />
         </div>
     );
