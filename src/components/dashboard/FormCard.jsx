@@ -1,5 +1,6 @@
 import React from 'react';
 import featureIcons from '../../utils/featureIcons';
+import { Plus, Images, Check, MapPin } from '@phosphor-icons/react';
 
 // ─── Predefined services catalogue ───────────────────────────────────────────
 const PREDEFINED_SERVICES = [
@@ -118,9 +119,7 @@ export const FormFeatureList = ({ label, id, value = [], onChange }) => {
                     {!showCustom ? (
                         <button type="button" onClick={() => setShowCustom(true)}
                             className="flex items-center gap-1.5 text-xs text-[#001f6c]/50 hover:text-[#ed6f00] font-semibold transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-3.5 h-3.5">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" />
-                            </svg>
+                            <Plus className="w-3.5 h-3.5"  />
                             Añadir servicio personalizado
                         </button>
                     ) : (
@@ -417,9 +416,7 @@ export const FormCheckbox = ({ label, id, ...rest }) => (
 /** Single image upload placeholder slot */
 export const ImageSlot = ({ label, large = false }) => (
     <label className={`flex flex-col items-center justify-center rounded-xl border-2 border-dashed border-gray-300 bg-[#f4f7fb] cursor-pointer hover:border-[#ed6f00] transition-colors group ${large ? 'h-32 w-full' : 'h-20 w-20'}`}>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-7 h-7 text-[#ed6f00] group-hover:scale-110 transition-transform">
-            <path fillRule="evenodd" d="M1.5 6a2.25 2.25 0 012.25-2.25h16.5A2.25 2.25 0 0122.5 6v12a2.25 2.25 0 01-2.25 2.25H3.75A2.25 2.25 0 011.5 18V6zM3 16.06V18c0 .414.336.75.75.75h16.5A.75.75 0 0021 18v-1.94l-2.69-2.689a1.5 1.5 0 00-2.12 0l-.88.879.97.97a.75.75 0 11-1.06 1.06l-5.16-5.159a1.5 1.5 0 00-2.12 0L3 16.061zm10.125-7.81a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0z" clipRule="evenodd" />
-        </svg>
+        <Images className="w-7 h-7 text-[#ed6f00] group-hover:scale-110 transition-transform" />
         {label && <span className="text-[10px] text-gray-400 mt-1">{label}</span>}
         <input type="file" accept="image/*" className="hidden" />
     </label>
@@ -544,9 +541,7 @@ export const FormPlaceSearch = ({ label, id, value = '', onChange, placeholder =
                 )}
                 {selected && !loading && (
                     <div className="absolute right-2 top-1/2 -translate-y-1/2 text-green-500">
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-                            <path fillRule="evenodd" d="M16.704 4.153a.75.75 0 01.143 1.052l-8 10.5a.75.75 0 01-1.127.075l-4.5-4.5a.75.75 0 011.06-1.06l3.894 3.893 7.48-9.817a.75.75 0 011.05-.143z" clipRule="evenodd" />
-                        </svg>
+                        <Check className="w-4 h-4"  />
                     </div>
                 )}
             </div>
@@ -556,10 +551,7 @@ export const FormPlaceSearch = ({ label, id, value = '', onChange, placeholder =
                     {results.map((place) => (
                         <li key={place.place_id} onClick={() => handleSelect(place)}
                             className="flex items-start gap-2 px-3 py-2.5 cursor-pointer hover:bg-[#f4f7fb] text-sm border-b border-gray-50 last:border-0 transition-colors">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.8} stroke="#ed6f00" className="w-4 h-4 shrink-0 mt-0.5">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M15 10.5a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 10.5c0 7.142-7.5 11.25-7.5 11.25S4.5 17.642 4.5 10.5a7.5 7.5 0 1 1 15 0Z" />
-                            </svg>
+                            <MapPin className="w-4 h-4 shrink-0 mt-0.5 text-[#ed6f00]"  />
                             <span className="text-[#001f6c] leading-tight">{place.display_name}</span>
                         </li>
                     ))}

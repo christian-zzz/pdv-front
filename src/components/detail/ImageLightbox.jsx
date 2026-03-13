@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { X, CaretLeft, CaretRight } from '@phosphor-icons/react';
 
 /**
  * ImageLightbox — full-screen modal gallery.
@@ -27,9 +28,7 @@ const ImageLightbox = ({ images = [], startAt = 0, onClose }) => {
                 aria-label="Cerrar"
                 className="absolute top-4 right-4 z-10 rounded-full bg-white/20 p-2 text-white hover:bg-white/40 transition-colors"
             >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="h-6 w-6">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-                </svg>
+                <X className="h-6 w-6"  />
             </button>
 
             {/* Prev arrow */}
@@ -39,9 +38,7 @@ const ImageLightbox = ({ images = [], startAt = 0, onClose }) => {
                 aria-label="Anterior"
                 className="absolute left-4 z-10 rounded-full bg-white/20 p-2.5 text-white hover:bg-white/40 transition-colors"
             >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="h-6 w-6">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                </svg>
+                <CaretLeft className="h-6 w-6"  />
             </button>
 
             {/* Image */}
@@ -63,9 +60,7 @@ const ImageLightbox = ({ images = [], startAt = 0, onClose }) => {
                 aria-label="Siguiente"
                 className="absolute right-4 z-10 rounded-full bg-white/20 p-2.5 text-white hover:bg-white/40 transition-colors"
             >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="h-6 w-6">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
+                <CaretRight className="h-6 w-6"  />
             </button>
 
             {/* Counter */}

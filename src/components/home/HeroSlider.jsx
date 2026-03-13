@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import slider1 from '../../assets/slider1.webp';
 import slider2 from '../../assets/slider2.webp';
+import { MagnifyingGlass } from '@phosphor-icons/react';
 
 const HeroSlider = () => {
     const images = [slider1, slider2];
@@ -43,9 +44,7 @@ const HeroSlider = () => {
                             className="w-full h-10 sm:h-11 pl-4 sm:pl-6 pr-10 text-[#001f6c] placeholder-[#6c7eab] text-sm sm:text-base outline-none rounded-full font-medium bg-transparent"
                         />
                         <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none">
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5 text-[#ed6f00]">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
-                            </svg>
+                            <MagnifyingGlass className="w-5 h-5 text-[#ed6f00]" />
                         </div>
                     </div>
                 </div>

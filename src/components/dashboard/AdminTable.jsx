@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { Plus } from '@phosphor-icons/react';
 
 /**
  * AdminTable — Generic reusable data table for admin modules.
@@ -81,9 +82,7 @@ const AdminTable = ({
                         onClick={onNew}
                         className="flex items-center gap-2 bg-[#001f6c] hover:bg-[#001f6c]/80 text-white text-sm font-semibold px-5 py-2.5 rounded-xl shadow transition-colors duration-200"
                     >
-                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-4 h-4">
-                            <path fillRule="evenodd" d="M12 3.75a.75.75 0 01.75.75v6.75h6.75a.75.75 0 010 1.5h-6.75v6.75a.75.75 0 01-1.5 0v-6.75H4.5a.75.75 0 010-1.5h6.75V4.5a.75.75 0 01.75-.75z" clipRule="evenodd" />
-                        </svg>
+                        <Plus className="w-4 h-4"  />
                         {newLabel}
                     </button>
                 )}

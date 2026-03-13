@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../api/axios';
+import { CheckCircle } from '@phosphor-icons/react';
 
 const WhatsappSettings = () => {
     const [status, setStatus] = useState({ connected: false });
@@ -103,9 +104,7 @@ const WhatsappSettings = () => {
                     ) : status.connected ? (
                         <div className="py-12 flex flex-col items-center">
                             <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mb-6">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
-                                </svg>
+                                <CheckCircle  className="h-12 w-12 text-green-600" />
                             </div>
                             <h3 className="text-xl font-bold text-gray-900 mb-2">¡WhatsApp vinculado correctamente!</h3>
                             <p className="text-gray-500 max-w-md">

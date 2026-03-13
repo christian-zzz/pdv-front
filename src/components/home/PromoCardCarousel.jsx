@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import PromoCard from './PromoCard';
+import { CaretLeft, CaretRight } from '@phosphor-icons/react';
 
 const GAP = 24; // gap-6 = 1.5rem = 24px
 
@@ -107,9 +108,7 @@ const PromoCardCarousel = ({ title, subtitle, items = [], className = '', verMas
                 aria-label="Previous cards"
                 className="absolute left-1 sm:left-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/90 hover:bg-white hover:scale-110 active:scale-95 p-2 shadow-md transition-all duration-200"
             >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5 text-[#001f6c]">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
-                </svg>
+                <CaretLeft className="h-5 w-5 text-[#001f6c]" />
             </button>
 
             {/* Viewport window */}
@@ -138,9 +137,7 @@ const PromoCardCarousel = ({ title, subtitle, items = [], className = '', verMas
                 aria-label="Next cards"
                 className="absolute right-1 sm:right-2 top-1/2 z-10 -translate-y-1/2 rounded-full bg-white/90 hover:bg-white hover:scale-110 active:scale-95 p-2 shadow-md transition-all duration-200"
             >
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="h-5 w-5 text-[#001f6c]">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
-                </svg>
+                <CaretRight className="h-5 w-5 text-[#001f6c]" />
             </button>
 
             {/* Ver Más */}

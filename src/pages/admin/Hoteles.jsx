@@ -11,6 +11,7 @@ import FormCard, {
     FormTextarea,
     FormCheckbox,
 } from '../../components/dashboard/FormCard';
+import { Check, PencilSimple, ArrowLeft, ArrowRight } from '@phosphor-icons/react';
 
 // ── Board-type Spanish label map (DB stores English keys) ────────────────────
 const BOARD_TYPE_ES = {
@@ -113,10 +114,7 @@ const StepIndicator = ({ current, total }) => (
                             ${!done && !active ? 'bg-white border-gray-200 text-gray-400' : ''}
                         `}>
                             {done ? (
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"
-                                    strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                                </svg>
+                                <Check className="w-4 h-4" />
                             ) : step.id}
                         </div>
                         <span className={`text-[11px] font-semibold text-center leading-tight
@@ -234,9 +232,7 @@ const HotelForm = ({ lookups, editRow, onSaved, onCancelEdit }) => {
             {isEditing && (
                 <div className="mb-3 flex items-center justify-between bg-amber-50 border border-amber-300 rounded-xl px-5 py-3">
                     <div className="flex items-center gap-2 text-amber-700 font-semibold text-sm">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-5 h-5">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="m16.862 4.487 1.687-1.688a1.875 1.875 0 1 1 2.652 2.652L10.582 16.07a4.5 4.5 0 0 1-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 0 1 1.13-1.897l8.932-8.931Zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0 1 15.75 21H5.25A2.25 2.25 0 0 1 3 18.75V8.25A2.25 2.25 0 0 1 5.25 6H10" />
-                        </svg>
+                        <PencilSimple className="w-5 h-5" />
                         Editando: <span className="font-bold">{editRow?.post?.name}</span>
                     </div>
                     <button type="button" onClick={handleCancel}
@@ -413,9 +409,7 @@ const HotelForm = ({ lookups, editRow, onSaved, onCancelEdit }) => {
                                 disabled={step === 1}
                                 className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-[#001f6c]/60 hover:border-[#001f6c]/30 hover:text-[#001f6c] disabled:opacity-30 disabled:cursor-not-allowed transition-all"
                             >
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18" />
-                                </svg>
+                                <ArrowLeft className="w-4 h-4" />
                                 Anterior
                             </button>
 
@@ -435,9 +429,7 @@ const HotelForm = ({ lookups, editRow, onSaved, onCancelEdit }) => {
                                     className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#001f6c] text-white text-sm font-semibold hover:bg-[#001f6c]/90 transition-all shadow-sm"
                                 >
                                     Siguiente
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5 21 12m0 0-7.5 7.5M21 12H3" />
-                                    </svg>
+                                    <ArrowRight className="w-4 h-4" />
                                 </button>
                             ) : (
                                 <button
@@ -453,9 +445,7 @@ const HotelForm = ({ lookups, editRow, onSaved, onCancelEdit }) => {
                                         </>
                                     ) : (
                                         <>
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
-                                            </svg>
+                                            <Check className="w-4 h-4" />
                                             {isEditing ? 'Guardar Cambios' : 'Crear Hotel'}
                                         </>
                                     )}

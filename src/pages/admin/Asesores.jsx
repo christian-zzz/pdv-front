@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../api/axios';
+import { User, Phone, Spinner } from '@phosphor-icons/react';
 
 const Asesores = () => {
     const [consultants, setConsultants] = useState([]);
@@ -101,16 +102,12 @@ const Asesores = () => {
                                     {consultant.img ? (
                                         <img src={consultant.img} alt={consultant.name} className="w-full h-full object-cover" />
                                     ) : (
-                                        <svg className="w-10 h-10 text-gray-400" fill="currentColor" viewBox="0 0 24 24">
-                                            <path d="M24 20.993V24H0v-2.996A14.977 14.977 0 0112.004 15c4.904 0 9.26 2.354 11.996 5.993zM16.002 8.999a4 4 0 11-8 0 4 4 0 018 0z" />
-                                        </svg>
+                                        <User className="w-10 h-10 text-gray-400" />
                                     )}
                                 </div>
                                 <h3 className="font-bold text-gray-900 text-lg mb-1">{consultant.name}</h3>
                                 <div className="flex items-center gap-1.5 text-gray-500 text-sm mb-4">
-                                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="w-4 h-4">
-                                        <path fillRule="evenodd" d="M2 3.5A1.5 1.5 0 013.5 2h1.148a1.5 1.5 0 011.465 1.175l.716 3.223a1.5 1.5 0 01-1.052 1.767l-.933.267c-.41.117-.643.555-.48.95a11.542 11.542 0 006.254 6.254c.395.163.833-.07.95-.48l.267-.933a1.5 1.5 0 011.767-1.052l3.223.716A1.5 1.5 0 0118 15.352V16.5a1.5 1.5 0 01-1.5 1.5H15c-1.149 0-2.263-.15-3.326-.43A13.022 13.022 0 012.43 8.326 13.019 13.019 0 012 5V3.5z" clipRule="evenodd" />
-                                    </svg>
+                                    <Phone  className="w-4 h-4" />
                                     {consultant.phone}
                                 </div>
                                 <button
@@ -186,10 +183,7 @@ const Asesores = () => {
                             >
                                 {submitting ? (
                                     <>
-                                        <svg className="animate-spin h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                        </svg>
+                                        <Spinner className="animate-spin h-5 w-5 text-white" />
                                         Guardando...
                                     </>
                                 ) : (

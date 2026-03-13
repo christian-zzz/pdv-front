@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../../context/AuthContext';
 import logo from '../../assets/logo.png';
+import { CaretDown, List, X } from '@phosphor-icons/react';
 
 const NAV_LINKS_LEFT = [
     { to: '/', label: 'Inicio' },
@@ -60,9 +61,7 @@ const Header = () => {
                         <div className="group relative cursor-pointer">
                             <span className="flex items-center gap-1 hover:text-amber-600 transition-colors">
                                 Hoteles
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                                </svg>
+                                <CaretDown className="w-4 h-4"  />
                             </span>
                             <div className="absolute top-full left-0 mt-2 w-48 bg-white text-gray-800 rounded-xl shadow-xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 z-50">
                                 {HOTELES_SUBMENU.map(({ to, label }) => (
@@ -99,14 +98,10 @@ const Header = () => {
                     >
                         {menuOpen ? (
                             /* X icon */
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M6 18 18 6M6 6l12 12" />
-                            </svg>
+                            <X className="w-6 h-6"  />
                         ) : (
                             /* Hamburger icon */
-                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-6 h-6">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
-                            </svg>
+                            <List className="w-6 h-6"  />
                         )}
                     </button>
                 </div>
@@ -137,14 +132,10 @@ const Header = () => {
                             className="w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-base font-medium hover:bg-[#001e6b]/8 hover:text-amber-600 transition-colors"
                         >
                             <span>Hoteles</span>
-                            <svg
-                                xmlns="http://www.w3.org/2000/svg"
-                                fill="none" viewBox="0 0 24 24"
-                                strokeWidth={2} stroke="currentColor"
+                            <CaretDown
                                 className={`w-4 h-4 transition-transform duration-200 ${hotelesOpen ? 'rotate-180' : ''}`}
-                            >
-                                <path strokeLinecap="round" strokeLinejoin="round" d="m19.5 8.25-7.5 7.5-7.5-7.5" />
-                            </svg>
+                                
+                            />
                         </button>
 
                         <div className={`overflow-hidden transition-all duration-200 ${hotelesOpen ? 'max-h-40' : 'max-h-0'}`}>

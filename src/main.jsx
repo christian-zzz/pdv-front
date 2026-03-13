@@ -5,11 +5,21 @@ import './index.css'
 import router from './router'
 
 import { AuthProvider } from './context/AuthContext'
+import { IconContext } from '@phosphor-icons/react'
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
     <AuthProvider>
-      <RouterProvider router={router} />
+      <IconContext.Provider
+        value={{
+          color: "currentColor",
+          size: "1.25em",
+          weight: "duotone",
+          mirrored: false,
+        }}
+      >
+        <RouterProvider router={router} />
+      </IconContext.Provider>
     </AuthProvider>
   </StrictMode>,
 )

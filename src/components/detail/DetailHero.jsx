@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import ImageLightbox from './ImageLightbox';
+import { Images } from '@phosphor-icons/react';
 
 /**
  * DetailHero — title, metadata badges, and a photo gallery grid.
@@ -58,9 +59,7 @@ const DetailHero = ({ title, badges = [], images = [] }) => {
                             {/* "Show all photos" button — mobile only when no side thumbs */}
                             {images.length > 1 && (
                                 <span className="md:hidden absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm rounded-full px-4 py-1.5 text-xs font-semibold text-[#001f6c] shadow-md flex items-center gap-1.5">
-                                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0 0 22.5 18.75V5.25A2.25 2.25 0 0 0 20.25 3H3.75A2.25 2.25 0 0 0 1.5 5.25v13.5A2.25 2.25 0 0 0 3.75 21Z" />
-                                    </svg>
+                                    <Images className="w-4 h-4"  />
                                     Ver todas las fotos
                                 </span>
                             )}
@@ -92,9 +91,7 @@ const DetailHero = ({ title, badges = [], images = [] }) => {
                                     {/* "Show all photos" on last thumbnail */}
                                     {isLast && (
                                         <span className="absolute bottom-3 left-3 bg-white/90 backdrop-blur-sm rounded-full px-3 py-1.5 text-xs font-semibold text-[#001f6c] shadow-md flex items-center gap-1.5">
-                                            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
-                                                <path strokeLinecap="round" strokeLinejoin="round" d="m2.25 15.75 5.159-5.159a2.25 2.25 0 0 1 3.182 0l5.159 5.159m-1.5-1.5 1.409-1.409a2.25 2.25 0 0 1 3.182 0l2.909 2.909M3.75 21h16.5A2.25 2.25 0 0 0 22.5 18.75V5.25A2.25 2.25 0 0 0 20.25 3H3.75A2.25 2.25 0 0 0 1.5 5.25v13.5A2.25 2.25 0 0 0 3.75 21Z" />
-                                            </svg>
+                                            <Images className="w-4 h-4"  />
                                             Ver todas las fotos
                                         </span>
                                     )}
