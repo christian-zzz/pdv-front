@@ -1,16 +1,18 @@
 import React, { useState } from 'react';
 import { XIcon, PaperPlaneRightIcon, CheckCircleIcon } from '@phosphor-icons/react';
+import api from '../../api/axios';
 
 /**
  * BookingForm — price display + consultation form.
  *
+ * @param {number} postId         — Post ID supporting the inquiry creation
  * @param {string} price          — formatted price, e.g. "$2,499"
  * @param {string} priceLabel     — e.g. "/ persona"
  * @param {boolean} isFlight      — changes form behavior to suit flights
  * @param {boolean} isAccommodation — changes form to suit accommodations
  * @param {Array} roomTypes       — available room types for dropdown
  */
-const BookingForm = ({ price = '$0', priceLabel = '/ persona', isFlight = false, isAccommodation = false, roomTypes = [] }) => {
+const BookingForm = ({ postId, price = '$0', priceLabel = '/ persona', isFlight = false, isAccommodation = false, roomTypes = [] }) => {
     const [form, setForm] = useState({
         name: '',
         email: '',
@@ -23,34 +25,64 @@ const BookingForm = ({ price = '$0', priceLabel = '/ persona', isFlight = false,
         kidsCount: 0,
         returnFlight: false,
     });
+    
+    const [submitting, setSubmitting] = useState(false);
+    const [success, setSuccess] = useState(false);
+    const [error, setError] = useState('');
 
     const update = (field) => (e) => {
         const val = e.target.type === 'checkbox' ? e.target.checked : e.target.value;
         setForm((prev) => {
             const nextForm = { ...prev, [field]: val };
-            // if unchecking children, reset kidsCount to 0
-            if (field === 'children' && !val) {
-                nextForm.kidsCount = 0;
-            }
-            // if checking children, ensure kidsCount is at least 1
-            if (field === 'children' && val && nextForm.kidsCount === 0) {
-                nextForm.kidsCount = 1;
-            }
+            if (field === 'children' && !val) nextForm.kidsCount = 0;
+            if (field === 'children' && val && nextForm.kidsCount === 0) nextForm.kidsCount = 1;
             return nextForm;
         });
     };
 
-    // Default the room selection if available
     React.useEffect(() => {
         if (isAccommodation && roomTypes.length > 0 && !form.room) {
             setForm(prev => ({ ...prev, room: roomTypes[0].id }));
         }
     }, [isAccommodation, roomTypes, form.room]);
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
-        // TODO: send to API
-        console.log('Consulta enviada:', form);
+        setSubmitting(true);
+        setError('');
+        setSuccess(false);
+
+        try {
+            const payload = {
+                post_FK: postId,
+                client_name: form.name,
+                client_email: form.email,
+                client_phone: form.phone,
+                from_date: form.dateFrom || null,
+                to_date: form.dateTo || null,
+                kids: form.children ? 1 : 0,
+                data: {
+                    guests: form.guests,
+                    kidsCount: form.kidsCount,
+                }
+            };
+
+            if (isFlight) payload.data.returnFlight = form.returnFlight;
+            if (isAccommodation && form.room) {
+                payload.data.roomType = form.room;
+                const rt = roomTypes.find(r => Number(r.id) === Number(form.room));
+                if (rt) payload.data.roomTypeName = rt.name;
+            }
+
+            await api.post('/consultas', payload);
+            setSuccess(true);
+            setForm({ name: '', email: '', phone: '', dateFrom: '', dateTo: '', room: roomTypes.length > 0 ? roomTypes[0].id : '', guests: 1, children: false, kidsCount: 0, returnFlight: false });
+        } catch (err) {
+            console.error('Error submitting inquiry:', err);
+            setError('Error al enviar la consulta. Inténtelo de nuevo.');
+        } finally {
+            setSubmitting(false);
+        }
     };
 
     return (

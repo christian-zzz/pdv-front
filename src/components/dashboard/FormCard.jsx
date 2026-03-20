@@ -1,6 +1,19 @@
 import React from 'react';
+import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
 import featureIcons from '../../utils/featureIcons';
 import { PlusIcon, ImagesIcon, CheckIcon, MapPinIcon, XIcon } from '@phosphor-icons/react';
+
+// Fix Marker URL default issue in react-leaflet
+if (typeof window !== 'undefined') {
+    delete L.Icon.Default.prototype._getIconUrl;
+    L.Icon.Default.mergeOptions({
+        iconRetinaUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon-2x.png',
+        iconUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-icon.png',
+        shadowUrl: 'https://unpkg.com/leaflet@1.9.4/dist/images/marker-shadow.png',
+    });
+}
 
 // ─── Predefined services catalogue ───────────────────────────────────────────
 const PREDEFINED_SERVICES = [
@@ -29,7 +42,7 @@ const ICON_OPTIONS = Object.keys(featureIcons);
  * FormFeatureList — toggleable predefined services grid + custom service row.
  * Produces a [{icon, label}] array.
  */
-export const FormFeatureList = ({ label, id, value = [], onChange }) => {
+export const FormFeatureList = ({ label, id, value = [], onChange, predefinedServices = PREDEFINED_SERVICES }) => {
     const [showCustom, setShowCustom] = React.useState(false);
     const [customIcon, setCustomIcon] = React.useState(ICON_OPTIONS[0] || 'wifi');
     const [customLabel, setCustomLabel] = React.useState('');
@@ -37,7 +50,7 @@ export const FormFeatureList = ({ label, id, value = [], onChange }) => {
     const pickerRef = React.useRef(null);
 
     const isPredefined = (svc) =>
-        PREDEFINED_SERVICES.some(p => p.icon === svc.icon && p.label === svc.label);
+        predefinedServices.some(p => p.icon === svc.icon && p.label === svc.label);
     const isActive = (svc) => value.some(v => v.icon === svc.icon && v.label === svc.label);
 
     const toggleService = (svc) => {
@@ -76,7 +89,7 @@ export const FormFeatureList = ({ label, id, value = [], onChange }) => {
 
                 {/* ── Predefined services grid ── */}
                 <div className="flex flex-wrap gap-2">
-                    {PREDEFINED_SERVICES.map((svc) => {
+                    {predefinedServices.map((svc) => {
                         const Icon = featureIcons[svc.icon];
                         const active = isActive(svc);
                         return (
@@ -189,7 +202,7 @@ export const FormFeatureList = ({ label, id, value = [], onChange }) => {
  * @param {Function} onChange         — (e) => void  (same API as FormSelect)
  * @param {Function} onCreateOption   — async (newLabel: string) => void
  */
-export const FormSelectCreatable = ({ label, id, options = [], value, onChange, onCreateOption, ...rest }) => {
+export const FormSelectCreatable = ({ label, id, options = [], value, onChange, onCreateOption, createPlaceholder = "Añadir nuevo…", ...rest }) => {
     const [newOption, setNewOption] = React.useState('');
     const [isCreating, setIsCreating] = React.useState(false);
 
@@ -225,7 +238,7 @@ export const FormSelectCreatable = ({ label, id, options = [], value, onChange, 
                 <div className="flex gap-2 items-center mt-1">
                     <input
                         type="text"
-                        placeholder="Añadir nuevo régimen…"
+                        placeholder={createPlaceholder}
                         value={newOption}
                         onChange={(e) => setNewOption(e.target.value)}
                         onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleCreate(); } }}
@@ -312,20 +325,20 @@ export const FormMultiSelect = ({ label, id, options = [], value = [], onChange,
     );
 };
 
-export const FormDynamicList = ({ label, id, value = '', onChange, placeholder = 'Añadir ítem...', ...rest }) => {
-    const list = value ? value.split(',').map(item => item.trim()).filter(Boolean) : [];
+export const FormDynamicList = ({ label, id, value = [], onChange, placeholder = 'Añadir ítem...', ...rest }) => {
+    const list = Array.isArray(value) ? value : [];
     const [newItem, setNewItem] = React.useState('');
 
     const handleAdd = () => {
         if (!newItem.trim()) return;
         const newList = [...list, newItem.trim()];
-        onChange(newList.join(', '));
+        onChange(newList);
         setNewItem('');
     };
 
     const handleRemove = (index) => {
         const newList = list.filter((_, i) => i !== index);
-        onChange(newList.join(', '));
+        onChange(newList);
     };
 
     return (
@@ -449,7 +462,7 @@ const FormCard = ({ title, onSubmit, submitLabel = 'Guardar', children }) => (
 );
 
 
-export const FormPlaceSearch = ({ label, id, value = '', onChange, placeholder = 'Ej: Hesperia Isla Margarita', category = '' }) => {
+export const FormPlaceSearch = ({ label, id, value = '', onChange, onSelect, placeholder = 'Ej: Hesperia Isla Margarita', category = '' }) => {
     const [query, setQuery] = React.useState(value || '');
     const [results, setResults] = React.useState([]);
     const [loading, setLoading] = React.useState(false);
@@ -516,6 +529,7 @@ export const FormPlaceSearch = ({ label, id, value = '', onChange, placeholder =
         setShowDropdown(false);
         setResults([]);
         onChange({ target: { value: place.display_name } });
+        if (onSelect) onSelect(place);
     };
 
     const handleChange = (e) => {
@@ -568,6 +582,59 @@ export const FormPlaceSearch = ({ label, id, value = '', onChange, placeholder =
                 <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-white border border-gray-200 rounded-xl shadow-xl px-4 py-3 text-sm text-gray-400">
                     Sin resultados para &ldquo;{query}&rdquo;
                 </div>
+            )}
+        </div>
+    );
+};
+
+function MapClickHandler({ onClick }) {
+    useMapEvents({
+        click(e) { if (onClick) onClick(e.latlng); }
+    });
+    return null;
+}
+
+function MapRecenter({ center }) {
+    const map = useMapEvents({});
+    React.useEffect(() => {
+        if (center) map.setView(center, 13);
+    }, [center, map]);
+    return null;
+}
+
+export const FormInteractiveMap = ({ label, id, value = '', onChange, centerCoords }) => {
+    const [coords, setCoords] = React.useState(null);
+
+    React.useEffect(() => {
+        if (value && value.includes(',')) {
+            const [lat, lon] = value.split(',').map(Number);
+            if (!isNaN(lat) && !isNaN(lon)) setCoords([lat, lon]);
+        } else if (centerCoords) {
+            setCoords([centerCoords.lat, centerCoords.lon]);
+        }
+    }, [value, centerCoords]);
+
+    const handleClick = (latlng) => {
+        const str = `${latlng.lat},${latlng.lng}`;
+        setCoords([latlng.lat, latlng.lng]);
+        onChange({ target: { value: str } });
+    };
+
+    return (
+        <div className="flex flex-col gap-1">
+            {label && <label className="text-xs font-semibold text-[#001f6c]">{label}</label>}
+            <div className="h-64 w-full rounded-xl border border-[#ed6f00]/30 overflow-hidden shadow-sm z-0">
+                <MapContainer center={coords || [10.95, -63.85]} zoom={coords ? 13 : 8} style={{ height: '100%', width: '100%' }}>
+                    <TileLayer url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png" attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>' />
+                    {coords && <Marker position={coords} />}
+                    <MapClickHandler onClick={handleClick} />
+                    {centerCoords && <MapRecenter center={[centerCoords.lat, centerCoords.lon]} />}
+                </MapContainer>
+            </div>
+            {coords && coords.length >= 2 && (
+                <p className="text-[10px] text-gray-400 mt-1">
+                    Coordenadas seleccionadas: {Number(coords[0]).toFixed(5)}, {Number(coords[1]).toFixed(5)}
+                </p>
             )}
         </div>
     );

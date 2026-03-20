@@ -1,196 +1,320 @@
 import React, { useState, useEffect } from 'react';
 import api from '../../api/axios';
 import AdminTable from '../../components/dashboard/AdminTable';
-import FormCard, { FormInput, FormSelect, FormPlaceSearch, FormTextarea, FormCheckbox, ImageSlot } from '../../components/dashboard/FormCard';
+import FormCard, {
+    FormInput,
+    FormSelect,
+    FormSelectCreatable,
+    FormPlaceSearch,
+    FormTextarea,
+    FormCheckbox,
+    FormFeatureList,
+    FormDynamicList,
+    FormInteractiveMap,
+} from '../../components/dashboard/FormCard';
+import { CheckIcon, PencilSimpleIcon, ArrowLeftIcon, ArrowRightIcon, ForkKnifeIcon, CalendarIcon, UsersIcon, MapPinIcon, GlobeIcon, StarIcon, CheckCircleIcon, XCircleIcon, HouseIcon, ImageIcon, ArticleIcon } from '@phosphor-icons/react';
 
-const Thumb = ({ image, initials = '' }) => (
-    <div className="flex items-center justify-center">
-        <div className="w-16 h-12 rounded-lg flex items-center justify-center text-white text-[10px] font-bold leading-tight text-center"
-            style={{ background: `linear-gradient(135deg, #001f6c, #001f6ccc)` }}>
-            {image ? <img src={image} alt="Thumbnail" className="w-full h-full object-cover rounded-lg" /> : initials}
-        </div>
+// ── Board-type Spanish label map (DB stores English keys) ────────────────────
+const BOARD_TYPE_ES = {
+    'All Inclusive': 'Todo Incluido',
+    'Breakfast Only': 'Solo Desayuno',
+    'Half Board': 'Media Pensión',
+    'Full Board': 'Pensión Completa',
+    'Room Only': 'Solo Habitación',
+    'No Meals': 'Sin Comidas',
+};
+const boardLabel = (type) => BOARD_TYPE_ES[type] ?? type;
+
+// ── Thumbnail cell ────────────────────────────────────────────────────────────
+const Thumb = ({ image }) => (
+    <div className="w-16 h-16 rounded-xl overflow-hidden shadow-sm shrink-0 mx-auto"
+        style={{ background: 'linear-gradient(135deg, #001f6c, #001f6ccc)' }}>
+        {image
+            ? <img src={image} alt="" className="w-full h-full object-cover" />
+            : <div className="w-full h-full flex items-center justify-center text-white text-xs font-bold">VL</div>}
     </div>
 );
 
+// ── Table columns ─────────────────────────────────────────────────────────────
 const COLUMNS = [
-    { key: 'thumb', label: 'Portada', render: (v, item) => <Thumb image={item.post?.thumbnail || item.post?.banner} initials="VL" /> },
-    { key: 'post.name', label: 'Nombre' },
-    { key: 'destination', label: 'Destino' },
-    { key: 'country.name', label: 'País' },
-    { key: 'starting_price', label: 'Precio ($)' },
-    { key: 'guest_type.name', label: 'Huéspedes', render: (v) => v || 'N/A' },
-    { key: 'board_type.name', label: 'Régimen', render: (v) => v || 'N/A' },
-    { key: 'isActive', label: 'Activo', render: (v) => v ? 'Sí' : 'No' },
+    { key: 'thumb', label: 'Portada', tdClass: 'px-3 py-2 align-middle w-24', render: (_, row) => <Thumb image={row.post?.thumbnail || row.post?.banner} /> },
+    { key: 'post.name', label: 'Nombre', sortable: true },
+    { key: 'destination', label: 'Destino', sortable: true, render: (v) => <span className="inline-flex items-center gap-1"><MapPinIcon size={12} className="text-[#ed6f00]" /> {v}</span> },
+    { key: 'country.name', label: 'País', sortable: true, render: (v) => <span className="inline-flex items-center gap-1"><GlobeIcon size={12} className="text-[#001f6c]/70" /> {v}</span> },
+    { key: 'starting_price', label: 'Precio ($)', sortable: true, render: (v) => <span className="font-bold text-[#ed6f00]">${v}</span> },
+    { key: 'isActive', label: 'Activo', sortable: true, render: (v) => v ? <CheckCircleIcon weight="fill" className="w-5 h-5 text-green-500 mx-auto" /> : <XCircleIcon weight="fill" className="w-5 h-5 text-red-500 mx-auto" /> },
 ];
 
-const VueloForm = ({ lookups, onCreated }) => {
-    const defaultForm = {
-        name: '',
-        destination: '',
-        country_FK: '',
-        map_location: '',
-        starting_price: '',
-        guest_type_FK: '',
-        board_type_FK: '',
-        features: '',
-        requirements: '',
-        overview: '',
-        information: '',
-        banner: '',
-        thumbnail: '',
-        imagesString: '', // comma-separated
-        isActive: true, // we added this in the migration
-    };
+// ── Steps configuration ───────────────────────────────────────────────────────
+const STEPS = [
+    { id: 1, label: 'General', icon: <HouseIcon className="w-5 h-5" /> },
+    { id: 2, label: 'Imágenes', icon: <ImageIcon className="w-5 h-5" /> },
+    { id: 3, label: 'Contenido', icon: <ArticleIcon className="w-5 h-5" /> },
+];
 
-    const [form, setForm] = useState(defaultForm);
-    const [loading, setLoading] = useState(false);
+// ── Default empty form ────────────────────────────────────────────────────────
+const defaultForm = () => ({
+    name: '',
+    destination: '',
+    country_FK: '',
+    map_location: '',
+    starting_price: '',
+    requirements: [],
+    features: [],
+    overview: '',
+    information: '',
+    banner: '',
+    thumbnail: '',
+    images: [],
+    isActive: true,
+});
+
+// ── Step indicator ────────────────────────────────────────────────────────────
+const StepIndicator = ({ current }) => (
+    <div className="flex items-center gap-0 mb-6">
+        {STEPS.map((step, idx) => {
+            const done = step.id < current;
+            const active = step.id === current;
+            const last = idx === STEPS.length - 1;
+            return (
+                <React.Fragment key={step.id}>
+                    <div className="flex flex-col items-center gap-1 min-w-[70px]">
+                        <div className={`w-10 h-10 rounded-full flex items-center justify-center text-sm font-bold border-2 transition-all
+                            ${done ? 'bg-[#ed6f00] border-[#ed6f00] text-white' : ''}
+                            ${active ? 'bg-[#001f6c] border-[#001f6c] text-white ring-4 ring-[#001f6c]/20' : ''}
+                            ${!done && !active ? 'bg-white border-gray-200 text-gray-400' : ''}
+                        `}>
+                            {done ? <CheckIcon className="w-4 h-4" /> : <span className="flex items-center justify-center translate-y-[-1px]">{step.icon}</span>}
+                        </div>
+                        <span className={`text-[11px] font-semibold text-center leading-tight ${active ? 'text-[#001f6c]' : done ? 'text-[#ed6f00]' : 'text-gray-400'}`}>
+                            {step.label}
+                        </span>
+                    </div>
+                    {!last && <div className={`flex-1 h-0.5 mb-4 mx-1 rounded transition-all ${done ? 'bg-[#ed6f00]' : 'bg-gray-200'}`} />}
+                </React.Fragment>
+            );
+        })}
+    </div>
+);
+
+// ── Vuelo Form ────────────────────────────────────────────────────────────────
+const FLIGHT_SERVICES = [
+    { icon: 'laundry', label: 'Equipaje 23kg' },
+    { icon: 'restaurant', label: 'Snack a bordo' },
+    { icon: 'safe', label: 'Seguro de Viaje' },
+    { icon: 'clock', label: 'Asistencia 24h' },
+    { icon: 'bus', label: 'Traslados' },
+];
+
+const VueloForm = ({ lookups, editRow, onSaved, onCancelEdit }) => {
+    const [step, setStep] = useState(1);
+    const [form, setForm] = useState(defaultForm());
+    const [saving, setSaving] = useState(false);
+    const [mapCoords, setMapCoords] = useState(null);
+    const isEditing = !!editRow;
+
+    useEffect(() => {
+        if (editRow) {
+            setForm({
+                name: editRow.post?.name || '',
+                destination: editRow.destination || '',
+                country_FK: editRow.country_FK != null ? String(editRow.country_FK) : '',
+                map_location: editRow.map_location || '',
+                starting_price: String(editRow.starting_price || ''),
+                requirements: Array.isArray(editRow.requirements) ? editRow.requirements : [],
+                features: Array.isArray(editRow.features) ? editRow.features : [],
+                overview: editRow.post?.overview || '',
+                information: editRow.post?.information || '',
+                banner: editRow.post?.banner || '',
+                thumbnail: editRow.post?.thumbnail || '',
+                images: (editRow.post?.images || []).map(i => i.url),
+                isActive: editRow.isActive ?? true,
+            });
+            setMapCoords(null);
+        } else {
+            setForm(defaultForm());
+            setMapCoords(null);
+        }
+        setStep(1);
+    }, [editRow]);
 
     const set = (k) => (e) =>
-        setForm((f) => ({ ...f, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }));
+        setForm(f => ({ ...f, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }));
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handlePlaceSelect = (place) => {
+        setMapCoords({ lat: Number(place.lat), lon: Number(place.lon) });
+        setForm(f => {
+            const updated = { ...f, map_location: `${place.lat},${place.lon}` };
+            if (place.address?.country) {
+                const countryMatch = lookups.countries.find(c => c.name.toLowerCase() === place.address.country.toLowerCase());
+                if (countryMatch) updated.country_FK = String(countryMatch.country_ID);
+            }
+            if (place.address && (place.address.city || place.address.town || place.address.village)) {
+                updated.destination = place.address.city || place.address.town || place.address.village;
+            }
+            return updated;
+        });
+    };
+
+    const galleryValue = form.images.join('\n');
+    const handleGallery = (e) => {
+        const urls = e.target.value.split('\n').map(s => s.trim()).filter(Boolean);
+        setForm(f => ({ ...f, images: urls }));
+    };
+
+    const handleSubmit = async () => {
+        setSaving(true);
+        const payload = {
+            ...form,
+            starting_price: parseFloat(form.starting_price),
+            country_FK: parseInt(form.country_FK, 10),
+            images: form.images.filter(Boolean),
+        };
         try {
-            setLoading(true);
-            const payload = {
-                ...form,
-                images: form.imagesString ? form.imagesString.split(',').map(u => u.trim()).filter(Boolean) : []
-            };
+            if (isEditing) {
+                await api.put(`/flights/${editRow.flights_ID}`, payload);
+                alert('Vuelo / Destino actualizado exitosamente!');
+            } else {
+                await api.post('/flights', payload);
+                alert('Vuelo / Destino creado exitosamente!');
+            }
+            setForm(defaultForm());
+            setStep(1);
+            if (onSaved) onSaved();
+        } catch (err) {
+            console.error('Error saving flight:', err);
+            alert('Error al guardar el vuelo.');
+        } finally { setSaving(false); }
+    };
 
-            await api.post('/flights', payload);
-            alert('Vuelo / Destino creado exitosamente!');
-            setForm(defaultForm);
-            if (onCreated) onCreated();
-        } catch (error) {
-            console.error('Error creating flight:', error);
-            alert('Error al crear el vuelo/destino.');
-        } finally {
-            setLoading(false);
-        }
+    const handleCreateLookup = (type) => async (newValue) => {
+        try {
+            const res = await api.post(`/lookups/${type}`, type === 'countries' ? { name: newValue } : { type: newValue });
+            const idKey = type === 'countries' ? 'country_ID' : 'other_ID';
+            const formKey = type === 'countries' ? 'country_FK' : 'other_FK';
+            setForm(f => ({ ...f, [formKey]: String(res.data[idKey]) }));
+            if (onSaved) onSaved();
+        } catch (err) { alert('Error al crear opción.'); }
     };
 
     return (
-        <FormCard title="Crear un Nuevo Vuelo / Destino" onSubmit={handleSubmit} submitLabel={loading ? "Creando..." : "Crear Vuelo"}>
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div className="space-y-4">
-                    <FormInput label="Nombre del Vuelo/Destino" id="vl-name" value={form.name} onChange={set('name')} required />
-
-                    <div className="grid grid-cols-2 gap-3">
-                        <FormInput label="Ciudad Destino" id="vl-destino" value={form.destination} onChange={set('destination')} required />
-                        <FormSelect label="País" id="vl-country"
-                            options={lookups.countries.map(c => ({ value: c.country_ID, label: c.name }))}
-                            value={form.country_FK} onChange={set('country_FK')} required
-                        />
+        <div id="form-vuelo">
+            {isEditing && (
+                <div className="mb-3 flex items-center justify-between bg-amber-50 border border-amber-300 rounded-xl px-5 py-3">
+                    <div className="flex items-center gap-2 text-amber-700 font-semibold text-sm">
+                        <PencilSimpleIcon className="w-5 h-5" /> Editando: <span className="font-bold">{editRow?.post?.name}</span>
                     </div>
-
-                    <div className="grid grid-cols-2 gap-3">
-                        <FormInput label="Precio ($)" id="vl-precio" type="number" min="0" step="0.01" value={form.starting_price} onChange={set('starting_price')} required />
-                    </div>
-
-                    <div className="mt-3">
-                        <FormPlaceSearch
-                            label="Ubicación Maps (Ej. Aeropuerto JFK)"
-                            id="vl-map_location"
-                            value={form.map_location}
-                            onChange={set('map_location')}
-                            category="aeropuerto"
-                        />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-3 mt-3">
-                        <FormSelect label="Tipo de Huésped (Opcional)" id="vl-guest"
-                            options={lookups.guestTypes.map(g => ({ value: g.guest_type_ID, label: g.type }))}
-                            value={form.guest_type_FK} onChange={set('guest_type_FK')}
-                        />
-                        <FormSelect label="Régimen (Opcional)" id="vl-board"
-                            options={lookups.boardTypes.map(b => ({ value: b.board_type_ID, label: b.type }))}
-                            value={form.board_type_FK} onChange={set('board_type_FK')}
-                        />
-                    </div>
+                    <button type="button" onClick={() => { setForm(defaultForm()); setStep(1); onCancelEdit(); }} className="text-sm text-amber-700 hover:text-red-600 font-bold underline transition-colors">Cancelar edición</button>
                 </div>
+            )}
 
-                <div className="space-y-4">
-                    <FormInput label="URL de la Imagen Banner" id="vl-banner" value={form.banner} onChange={set('banner')} placeholder="https://ejemplo.com/banner.jpg" />
-                    <FormInput label="URL de la Imagen Thumbnail" id="vl-thumb" value={form.thumbnail} onChange={set('thumbnail')} placeholder="https://ejemplo.com/thumb.jpg" />
-                    <FormTextarea label="URLs de Galería (separadas por coma)" id="vl-images" rows={3} value={form.imagesString} onChange={set('imagesString')} placeholder="https://img1.jpg, https://img2.jpg" />
+            <div className="bg-white rounded-2xl border border-[#ed6f00] shadow-sm overflow-visible">
+                <div className="bg-[#f4f7fb] border-b border-[#ed6f00]/30 px-6 py-4">
+                    <h2 className="text-lg font-extrabold text-[#001f6c]">{isEditing ? 'Editar Vuelo / Destino' : 'Crear un Nuevo Vuelo / Destino'}</h2>
+                </div>
+                <div className="p-6">
+                    <StepIndicator current={step} />
+                    <div>
+                        {step === 1 && (
+                            <div className="space-y-4 animate-in fade-in duration-200">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                    <FormInput label="Nombre del Vuelo/Destino" id="vl-name" value={form.name} onChange={set('name')} required />
+                                    <FormInput label="Ciudad Destino" id="vl-destination" value={form.destination} onChange={set('destination')} required />
+                                </div>
+                                <div className="grid grid-cols-2 gap-4">
+                                    <FormSelectCreatable label="País" id="vl-country" options={lookups.countries.map(c => ({ value: c.country_ID, label: c.name }))} value={form.country_FK} onChange={set('country_FK')} onCreateOption={handleCreateLookup('countries')} createPlaceholder="Añadir nuevo país…" required />
+                                    <FormInput label="Precio ($)" id="vl-precio" type="number" min="0" step="0.01" value={form.starting_price} onChange={set('starting_price')} required />
+                                </div>
+                                <div className="flex flex-col gap-1">
+                                    <FormPlaceSearch label="Buscar Ubicación (Auto-rellena Ciudad/País)" id="vl-map_search" value={form.map_location && !form.map_location.includes(',') ? form.map_location : ''} onChange={(e) => setForm(f => ({ ...f, map_location: e.target.value }))} onSelect={handlePlaceSelect} category="aeropuerto" />
+                                    <FormInteractiveMap label="Ubicación exacta en Mapa (Clic para marcar)" id="vl-map_location" value={form.map_location} onChange={set('map_location')} centerCoords={mapCoords} />
+                                </div>
+                                <FormCheckbox label="Vuelo Activo" id="vl-activo" checked={form.isActive} onChange={set('isActive')} />
+                            </div>
+                        )}
+
+                        {step === 2 && (
+                            <div className="space-y-5 animate-in fade-in duration-200">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                    <div className="space-y-4">
+                                        <FormInput label="URL del Banner" id="vl-banner" type="url" placeholder="https://..." value={form.banner} onChange={set('banner')} />
+                                        <FormInput label="URL del Thumbnail" id="vl-thumbnail" type="url" placeholder="https://..." value={form.thumbnail} onChange={set('thumbnail')} />
+                                    </div>
+                                    <div>
+                                        {(form.banner || form.thumbnail) && (
+                                            <div className="flex gap-3 mb-2">
+                                                {form.banner && <div className="flex-1"><p className="text-[10px] font-semibold text-[#001f6c]/60 uppercase mb-1">Banner</p><img src={form.banner} alt="Banner" className="w-full h-24 object-cover rounded-lg border border-gray-200" onError={(e) => e.target.style.display = 'none'} /></div>}
+                                                {form.thumbnail && <div className="w-24"><p className="text-[10px] font-semibold text-[#001f6c]/60 uppercase mb-1">Thumbnail</p><img src={form.thumbnail} alt="Thumbnail" className="w-24 h-24 object-cover rounded-lg border border-gray-200" onError={(e) => e.target.style.display = 'none'} /></div>}
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
+                                <div className="flex flex-col gap-1">
+                                    <label htmlFor="vl-images" className="text-xs font-semibold text-[#001f6c]">URLs de Galería <span className="font-normal text-gray-400">(una por línea)</span></label>
+                                    <textarea id="vl-images" rows={6} value={galleryValue} onChange={handleGallery} placeholder={"https://..."} className="w-full rounded-lg border border-[#ed6f00]/50 bg-white px-3 py-2 text-sm text-[#001f6c] focus:outline-none focus:ring-2 focus:ring-[#ed6f00]/40 transition font-mono" />
+                                    <p className="text-[11px] text-gray-400">{form.images.length} imágenes</p>
+                                </div>
+                            </div>
+                        )}
+
+                        {step === 3 && (
+                            <div className="space-y-5 animate-in fade-in duration-200">
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                    <FormTextarea label="Resumen Corto" id="vl-overview" rows={5} value={form.overview} onChange={set('overview')} required />
+                                    <FormTextarea label="Información Completa" id="vl-info" rows={5} value={form.information} onChange={set('information')} />
+                                </div>
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                                    <FormFeatureList label="Características Destacadas" id="vl-features" value={form.features} onChange={(arr) => setForm(f => ({ ...f, features: arr }))} predefinedServices={[]} />
+                                    <FormDynamicList label="Requisitos de Viaje" id="vl-reqs" value={form.requirements} onChange={(arr) => setForm(f => ({ ...f, requirements: arr }))} placeholder="Añadir requisito (Ej. Visa)..." />
+                                </div>
+                            </div>
+                        )}
+
+                        <div className="flex items-center justify-between mt-8 pt-5 border-t border-gray-100">
+                            <button type="button" onClick={() => setStep(s => Math.max(1, s - 1))} disabled={step === 1} className="flex items-center gap-2 px-5 py-2.5 rounded-xl border border-gray-200 text-sm font-semibold text-[#001f6c]/60 hover:border-[#001f6c]/30 hover:text-[#001f6c] disabled:opacity-30 transition-all"><ArrowLeftIcon className="w-4 h-4" /> Anterior</button>
+                            <div className="flex items-center gap-2">{STEPS.map(s => <button key={s.id} type="button" onClick={() => setStep(s.id)} className={`w-2 h-2 rounded-full transition-all ${step === s.id ? 'bg-[#001f6c] w-4' : step > s.id ? 'bg-[#ed6f00]' : 'bg-gray-200'}`} />)}</div>
+                            {step < STEPS.length ? (
+                                <button type="button" onClick={() => setStep(s => Math.min(STEPS.length, s + 1))} className="flex items-center gap-2 px-5 py-2.5 rounded-xl bg-[#001f6c] text-white text-sm font-semibold hover:bg-[#001f6c]/90 transition-all"><ArrowRightIcon className="w-4 h-4" /> Siguiente</button>
+                            ) : (
+                                <button type="button" onClick={handleSubmit} disabled={saving} className="flex items-center gap-2 px-8 py-2.5 rounded-xl bg-[#ed6f00] text-white text-sm font-bold hover:bg-[#ed6f00]/90 disabled:opacity-60 transition-all">{saving ? 'Guardando...' : isEditing ? 'Guardar Cambios' : 'Crear Vuelo'}</button>
+                            )}
+                        </div>
+                    </div>
                 </div>
             </div>
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-2">
-                <div className="space-y-4">
-                    <FormTextarea label="Descripción Corta (Overview)" id="vl-overview" rows={3} value={form.overview} onChange={set('overview')} required />
-                    <FormTextarea label="Características destacadas" id="vl-features" rows={3} value={form.features} onChange={set('features')} />
-                </div>
-                <div className="space-y-4">
-                    <FormTextarea label="Información Completa" id="vl-information" rows={3} value={form.information} onChange={set('information')} />
-                    <FormTextarea label="Requisitos de Viaje" id="vl-requirements" rows={3} value={form.requirements} onChange={set('requirements')} />
-                </div>
-            </div>
-
-            <div className="flex gap-6 mt-4">
-                <FormCheckbox label="Vuelo Activo" id="vl-activo" checked={form.isActive} onChange={set('isActive')} />
-            </div>
-        </FormCard>
+        </div>
     );
 };
 
+// ── Page ──────────────────────────────────────────────────────────────────────
 const Vuelos = () => {
     const [flights, setFlights] = useState([]);
     const [lookups, setLookups] = useState({ countries: [], guestTypes: [], boardTypes: [] });
     const [loading, setLoading] = useState(true);
+    const [editRow, setEditRow] = useState(null);
 
     const fetchData = async () => {
         try {
             setLoading(true);
-            const [flightsRes, lookupsRes] = await Promise.all([
-                api.get('/flights'),
-                api.get('/lookups')
-            ]);
-
-            const flatFlights = flightsRes.data.map(flight => ({
-                ...flight,
-                'post.name': flight.post?.name,
-                'country.name': flight.country?.name,
-                'guest_type.name': flight.guestType?.type,
-                'board_type.name': flight.boardType?.type,
-            }));
-
-            setFlights(flatFlights);
-
-            setLookups({
-                countries: lookupsRes.data.countries || [],
-                guestTypes: lookupsRes.data.guest_types || [],
-                boardTypes: lookupsRes.data.board_types || []
-            });
-        } catch (err) {
-            console.error('Error fetching data:', err);
-        } finally {
-            setLoading(false);
-        }
+            const [flightsRes, lookupsRes] = await Promise.all([api.get('/flights'), api.get('/lookups')]);
+            setFlights(flightsRes.data.map(f => ({ ...f, 'post.name': f.post?.name, 'country.name': f.country?.name })));
+            setLookups({ countries: lookupsRes.data.countries || [], guestTypes: [], boardTypes: [] });
+        } catch (err) { console.error(err); } finally { setLoading(false); }
     };
 
-    useEffect(() => {
-        fetchData();
-    }, []);
+    useEffect(() => { fetchData(); }, []);
+
+    const handleArchive = async (row) => {
+        if (!window.confirm(`¿Eliminar "${row['post.name']}"?`)) return;
+        try { await api.delete(`/flights/${row.flights_ID}`); fetchData(); } catch (err) { alert('Error al eliminar.'); }
+    };
 
     return (
         <div className="p-6 space-y-8 animate-in fade-in duration-300">
-            {loading ? (
-                <div className="flex justify-center p-10"><div className="animate-spin h-8 w-8 border-b-2 border-[#ed6f00] rounded-full"></div></div>
-            ) : (
-                <AdminTable
-                    title="Vuelos / Destinos API"
-                    newLabel="Nuevo Vuelo"
-                    columns={COLUMNS}
-                    data={flights}
-                    pageSize={10}
-                    onNew={() => document.getElementById('form-vuelo')?.scrollIntoView({ behavior: 'smooth' })}
-                    onView={(row) => alert(`Vista previa: ${row['post.name']}`)}
-                    onEdit={(row) => alert(`Editar funcionalidad en proceso: ${row['post.name']}`)}
-                    onArchive={(row) => alert(`Archivar funcionalidad en proceso: ${row['post.name']}`)}
-                />
+            {loading ? <div className="flex justify-center p-10"><div className="animate-spin h-8 w-8 border-b-2 border-[#ed6f00] rounded-full" /></div> : (
+                <AdminTable title="Vuelos / Destinos" newLabel="Nuevo Vuelo" columns={COLUMNS} data={flights} pageSize={10} onNew={() => { setEditRow(null); document.getElementById('form-vuelo')?.scrollIntoView({ behavior: 'smooth' }); }} onEdit={(r) => { setEditRow(r); document.getElementById('form-vuelo')?.scrollIntoView({ behavior: 'smooth' }); }} onArchive={handleArchive} />
             )}
-            <div id="form-vuelo"><VueloForm lookups={lookups} onCreated={fetchData} /></div>
+            <VueloForm lookups={lookups} editRow={editRow} onSaved={() => { setEditRow(null); fetchData(); }} onCancelEdit={() => setEditRow(null)} />
         </div>
     );
 };
