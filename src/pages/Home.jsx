@@ -1,9 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import useDocumentTitle from '../hooks/useDocumentTitle';
 import FilterBar from '../components/home/FilterBar';
 import HeroSlider from '../components/home/HeroSlider';
 import PromoCardCarousel from '../components/home/PromoCardCarousel';
 import TestimonialCarousel from '../components/home/TestimonialCarousel';
 import api from '../api/axios';
+import { getImageUrl } from '../utils/imageHandler';
 
 import mgtathmb from '../assets/mgtathmb.jpg';
 import testimonial1 from '../assets/testimonial1.jpg';
@@ -20,16 +23,43 @@ const TESTIMONIALS = [
 ];
 
 const Home = () => {
+    useDocumentTitle('Inicio');
+    const navigate = useNavigate();
     const [packages, setPackages] = useState([]);
     const [flights, setFlights] = useState([]);
     const [filters, setFilters] = useState(null);
+    const [priceBounds, setPriceBounds] = useState({ min: 0, max: 1000 });
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 const [pRes, fRes] = await Promise.all([api.get('/packages'), api.get('/flights')]);
-                setPackages(pRes.data || []);
-                setFlights(fRes.data || []);
+                const pData = pRes.data || [];
+                const fData = fRes.data || [];
+                
+                setPackages(pData);
+                setFlights(fData);
+
+                // Calculate global min and max prices
+                let minP = Infinity;
+                let maxP = -Infinity;
+                
+                const processPrice = (item) => {
+                    const price = Number(item.starting_price);
+                    if (!isNaN(price)) {
+                        if (price < minP) minP = price;
+                        if (price > maxP) maxP = price;
+                    }
+                };
+
+                pData.forEach(processPrice);
+                fData.forEach(processPrice);
+
+                if (minP === Infinity) minP = 0;
+                if (maxP === -Infinity) maxP = 1000;
+
+                setPriceBounds({ min: minP, max: maxP });
+
             } catch (err) {
                 console.error('Error loading home data:', err);
             }
@@ -38,7 +68,7 @@ const Home = () => {
     }, []);
 
     const filterItems = (items) => {
-        if (!filters) return items;
+        if (!filters) return [];
         return items.filter(item => {
             const locMatch = !filters.ubicacion || 
                 (item.destination && item.destination.toLowerCase().includes(filters.ubicacion.toLowerCase())) ||
@@ -60,39 +90,54 @@ const Home = () => {
 
     const mapPackageToCard = (p) => ({
         id: p.packages_ID,
-        image: p.post?.thumbnail ? `http://localhost:8000/storage/${p.post.thumbnail}` : mgtathmb,
+        image: p.post?.thumbnail ? getImageUrl(p.post.thumbnail) : mgtathmb,
         title: p.post?.name || 'Paquete',
         subtitle: p.post?.overview || 'Detalle del paquete',
         priceLabel: 'Desde',
         priceValue: `$${p.starting_price}`,
         ctaLabel: 'Ver Paquetes',
-        onCtaClick: () => alert(`Ver paquete ${p.packages_ID}`),
+        link: `/package/${p.packages_ID}`,
+        onCtaClick: () => navigate(`/package/${p.packages_ID}`),
     });
 
     const mapFlightToCard = (f) => ({
         id: f.flights_ID,
-        image: f.post?.thumbnail ? `http://localhost:8000/storage/${f.post.thumbnail}` : mgtathmb,
+        image: f.post?.thumbnail ? getImageUrl(f.post.thumbnail) : mgtathmb,
         title: f.post?.name || `Vuelo a ${f.destination || 'Destino'}`,
         subtitle: f.post?.overview || 'Boletería aérea disponible',
         priceLabel: 'Desde',
         priceValue: `$${f.starting_price}`,
         ctaLabel: 'Ver Vuelo',
-        onCtaClick: () => alert(`Ver Vuelo ${f.flights_ID}`),
+        link: `/vuelo/${f.flights_ID}`,
+        onCtaClick: () => navigate(`/vuelo/${f.flights_ID}`),
     });
 
-    const filteredPackages = filterItems(packages);
-    const filteredFlights = filterItems(flights);
+    const searchResults = filters ? [
+        ...filterItems(packages).map(mapPackageToCard),
+        ...filterItems(flights).map(mapFlightToCard)
+    ] : [];
 
     return (
         <div>
             <HeroSlider />
-            <FilterBar onSearch={setFilters} />
+            <FilterBar onSearch={setFilters} minBound={priceBounds.min} maxBound={priceBounds.max} />
+
+            {filters && (
+                <section className="px-4 sm:px-6 py-10 bg-blue-50/50 border-b border-[#001f6c]/10 relative">
+                    <div className="absolute top-0 left-0 w-1 h-full bg-[#ed6f00]"></div>
+                    <PromoCardCarousel
+                        title="Resultados de la búsqueda"
+                        subtitle={searchResults.length > 0 ? `Encontramos ${searchResults.length} opciones ideales para ti` : 'No encontramos resultados exactos, explora nuestras promos abajo.'}
+                        items={searchResults}
+                    />
+                </section>
+            )}
 
             <section className="px-4 sm:px-6 py-10">
                 <PromoCardCarousel
                     title="Paquetes irresistibles"
                     subtitle="Viaja pagando en comodas cuotas"
-                    items={filteredPackages.map(mapPackageToCard)}
+                    items={packages.map(mapPackageToCard)}
                 />
             </section>
 
@@ -100,7 +145,7 @@ const Home = () => {
                 <PromoCardCarousel
                     title="Oferta en Boleteria Aerea"
                     subtitle="Boleteria nacional e internacional"
-                    items={filteredFlights.map(mapFlightToCard)}
+                    items={flights.map(mapFlightToCard)}
                 />
             </section>
 

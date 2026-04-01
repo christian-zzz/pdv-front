@@ -1,9 +1,11 @@
 import React from 'react';
+import { showError } from '../../utils/swal';
 import { MapContainer, TileLayer, Marker, useMapEvents } from 'react-leaflet';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import featureIcons from '../../utils/featureIcons';
-import { PlusIcon, ImagesIcon, CheckIcon, MapPinIcon, XIcon } from '@phosphor-icons/react';
+import { PlusIcon, ImagesIcon, CheckIcon, MapPinIcon, XIcon, UploadSimpleIcon } from '@phosphor-icons/react';
+import api from '../../api/axios';
 
 // Fix Marker URL default issue in react-leaflet
 if (typeof window !== 'undefined') {
@@ -390,6 +392,103 @@ export const FormInput = ({ label, id, type = 'text', placeholder = '', ...rest 
         />
     </div>
 );
+
+export const FormImageUpload = ({ label, id, value = '', onChange }) => {
+    const [uploading, setUploading] = React.useState(false);
+    
+    const handleFileChange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+        
+        const formData = new FormData();
+        formData.append('image', file);
+        
+        try {
+            setUploading(true);
+            const res = await api.post('/upload', formData, {
+                headers: { 'Content-Type': 'multipart/form-data' }
+            });
+            const localUrl = import.meta.env.VITE_API_URL.replace('/api', '') + res.data.url;
+            onChange({ target: { value: localUrl } });
+        } catch (error) {
+            console.error("Upload error", error);
+            showError("Error uploading image");
+        } finally {
+            setUploading(false);
+            e.target.value = null;
+        }
+    };
+
+    return (
+        <div className="flex flex-col gap-1">
+            {label && <label htmlFor={id} className="text-xs font-semibold text-[#001f6c]">{label}</label>}
+            <div className="flex gap-2 items-center">
+                <input
+                    id={id}
+                    type="text"
+                    value={value || ''}
+                    onChange={onChange}
+                    placeholder="URL o sube un archivo..."
+                    className="flex-1 rounded-lg border border-[#ed6f00]/50 bg-white px-3 py-2 text-sm text-[#001f6c] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ed6f00]/40 transition"
+                />
+                <label className={`shrink-0 flex items-center justify-center h-[38px] px-4 rounded-lg bg-[#f4f7fb] text-[#ed6f00] font-bold text-sm cursor-pointer border border-[#ed6f00]/30 hover:bg-[#ed6f00] hover:text-white transition-colors ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                    {uploading ? 'Subiendo...' : 'Subir'}
+                    <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
+                </label>
+            </div>
+        </div>
+    );
+};
+
+export const FormGalleryUpload = ({ label, id, value = [], onChange }) => {
+    const [uploading, setUploading] = React.useState(false);
+
+    const handleFileChange = async (e) => {
+        const files = Array.from(e.target.files);
+        if (!files.length) return;
+
+        setUploading(true);
+        const newUrls = [];
+        
+        for (const file of files) {
+            const formData = new FormData();
+            formData.append('image', file);
+            try {
+                const res = await api.post('/upload', formData, {
+                    headers: { 'Content-Type': 'multipart/form-data' }
+                });
+                const localUrl = import.meta.env.VITE_API_URL.replace('/api', '') + res.data.url;
+                newUrls.push(localUrl);
+            } catch (err) {
+                console.error("Img upload failed");
+            }
+        }
+        
+        onChange([...(Array.isArray(value) ? value : []), ...newUrls]);
+        setUploading(false);
+        e.target.value = null; // reset input
+    };
+
+    const textValue = Array.isArray(value) ? value.join('\n') : '';
+    const handleTextChange = (e) => {
+        const urls = e.target.value.split('\n').map(s => s.trim()).filter(Boolean);
+        onChange(urls);
+    };
+
+    return (
+        <div className="flex flex-col gap-1">
+            <div className="flex justify-between items-end mb-1">
+                {label && <label htmlFor={id} className="text-xs font-semibold text-[#001f6c]">{label} <span className="font-normal text-gray-400">(una por línea)</span></label>}
+                <label className={`text-[11px] font-bold px-3 py-1 rounded bg-[#ed6f00] text-white cursor-pointer hover:bg-[#ed6f00]/80 transition-colors ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                    {uploading ? 'Subiendo...' : '+ Subir Archivos'}
+                    <input type="file" accept="image/*" multiple className="hidden" onChange={handleFileChange} />
+                </label>
+            </div>
+            <textarea id={id} rows={6} value={textValue} onChange={handleTextChange} placeholder="https://..." wrap="off" className="w-full rounded-lg border border-[#ed6f00]/50 bg-white px-3 py-2 text-sm text-[#001f6c] focus:outline-none focus:ring-2 focus:ring-[#ed6f00]/40 transition font-mono whitespace-pre" />
+            <p className="text-[11px] text-gray-400">{Array.isArray(value) ? value.length : 0} imágenes</p>
+        </div>
+    );
+};
 
 export const FormSelect = ({ label, id, options = [], ...rest }) => (
     <div className="flex flex-col gap-1">

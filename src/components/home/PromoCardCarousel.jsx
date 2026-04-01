@@ -149,15 +149,7 @@ const PromoCardCarousel = ({ title, subtitle, items = [], className = '', verMas
                     >
                         Ver Más
                     </Link>
-                ) : (
-                    <button
-                        type="button"
-                        onClick={() => alert('Ver más clicked')}
-                        className="rounded-full bg-[#ed6f00] px-6 py-2 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:scale-[1.04] hover:bg-[#d96200] active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ed6f00] focus-visible:ring-offset-2"
-                    >
-                        Ver Más
-                    </button>
-                )}
+                ) : null}
             </div>
         </div>
     );

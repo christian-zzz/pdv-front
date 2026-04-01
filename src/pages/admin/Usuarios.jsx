@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import useDocumentTitle from '../../hooks/useDocumentTitle';
 import api from '../../api/axios';
 import { SpinnerIcon } from '@phosphor-icons/react';
 
@@ -9,6 +10,7 @@ const ROLE_NAMES = {
 };
 
 const Usuarios = () => {
+    useDocumentTitle('Usuarios');
     const [users, setUsers] = useState([]);
     const [loading, setLoading] = useState(true);
     const [formData, setFormData] = useState({

@@ -1,140 +1,168 @@
-import React from 'react';
 import { useParams } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import useDocumentTitle from '../hooks/useDocumentTitle';
+import api from '../api/axios';
+import { getImageUrl } from '../utils/imageHandler';
 import DetailBanner from '../components/detail/DetailBanner';
 import DetailHero from '../components/detail/DetailHero';
 import AccommodationInfo from '../components/detail/AccommodationInfo';
 import BookingForm from '../components/detail/BookingForm';
 import LocationMap from '../components/detail/LocationMap';
 import PromoCardCarousel from '../components/home/PromoCardCarousel';
-
-// Import images
-import detail1 from '../assets/detail1.jpg';
-import detail2 from '../assets/detail2.jpg';
-import detail3 from '../assets/detail3.jpg';
-import detail4 from '../assets/detail4.jpg';
-import detail5 from '../assets/detail5.jpg';
-import detail6 from '../assets/detail6.jpg';
-import lrqthmb from '../assets/lrqthmb.jpg';
 import mgtathmb from '../assets/mgtathmb.jpg';
-import cocthmb from '../assets/cocthmb.jpg';
+import { MapPinIcon, StarIcon } from '@phosphor-icons/react';
 
-import { MapPinIcon } from '@phosphor-icons/react';
-
-// ── Demo data (will come from API later) ──────────────────────────────────────
-const DEMO_ACCOMMODATION = {
-    title: 'Hesperia Isla Margarita',
-    price: 'Desde $120',
-    priceLabel: '/ noche',
-    badges: [
-        {
-            icon: <MapPinIcon className="w-5 h-5" />,
-            text: 'Isla de Margarita, Venezuela',
-        },
-    ],
-    images: [detail1, detail2, detail3, detail4, detail5, detail6],
-    details: {
-        destination: 'Isla de Margarita, Nueva Esparta',
-        stars: 5,
-        boardType: 'Todo Incluido',
-        description: 'Construido en una franja de playa a la cual está directamente asomado, el hotel Hesperia Isla Margarita es sinónimo de elegancia y sofisticación. Rodeado por un paisaje idílico de exuberante vegetación y un mar de aguas cristalinas, este resort 5 estrellas es el lugar perfecto para quienes buscan un descanso exclusivo y un servicio impecable. Sus habitaciones, amplias y confortables, garantizan el máximo bienestar de cada huésped. A solo minutos del pintoresco poblado de Juan Griego en el norte de la Isla, este paraíso goza del innegable encanto del Caribe Venezolano.',
-        amenities: [
-            { icon: 'wifi', label: 'WiFi Libre' },
-            { icon: 'pool', label: 'Piscina Inmensa' },
-            { icon: 'spa', label: 'Spa y Masajes' },
-            { icon: 'gym', label: 'Gimnasio' },
-            { icon: 'restaurant', label: 'Bares y Restaurantes' },
-            { icon: 'clock', label: 'Servicio 24h' },
-            { icon: 'ac', label: 'Aire Acondicionado' },
-            { icon: 'tennis', label: 'Cancha de Pádel / Tenis' },
-            { icon: 'beach', label: 'Acceso Directo a la Playa' },
-            { icon: 'parking', label: 'Estacionamiento' },
-        ],
-    },
-    rooms: [
-        { id: '1', name: 'Habitación Doble Estándar' },
-        { id: '2', name: 'Habitación Doble Superior con vista al mar' },
-        { id: '3', name: 'Suite Junior' },
-        { id: '4', name: 'Suite Familiar' },
-    ]
-};
-
+/**
+ * Vista de detalle de un alojamiento.
+ * Carga la información del hotel desde la API y muestra
+ * galería, características, formulario de consulta y alojamientos relacionados.
+ */
 const AccommodationDetail = () => {
     const { id } = useParams();
+    const [accommodation, setAccommodation] = useState(null);
+    const [related, setRelated] = useState([]);
+    const [loading, setLoading] = useState(true);
+    useDocumentTitle(accommodation?.post?.name || 'Hotel');
 
-    // In future: fetch accommodation by `id` from the API
-    const accommodation = DEMO_ACCOMMODATION;
+    useEffect(() => {
+        const fetchData = async () => {
+            setLoading(true);
+            try {
+                const [accRes, allRes] = await Promise.all([
+                    api.get(`/accommodations/${id}`),
+                    api.get('/accommodations'),
+                ]);
+                setAccommodation(accRes.data);
+                const others = (allRes.data || []).filter(
+                    a => String(a.accommodation_ID) !== String(id)
+                );
+                setRelated(others.slice(0, 5));
+            } catch (err) {
+                console.error('Error al cargar alojamiento:', err);
+            } finally {
+                setLoading(false);
+            }
+        };
+        fetchData();
+        window.scrollTo(0, 0);
+    }, [id]);
+
+    if (loading) {
+        return (
+            <div className="min-h-screen flex items-center justify-center">
+                <div className="w-10 h-10 border-4 border-[#001f6c] border-t-transparent rounded-full animate-spin"></div>
+            </div>
+        );
+    }
+
+    if (!accommodation) {
+        return (
+            <div className="min-h-screen flex items-center justify-center text-[#001f6c]">
+                <p className="text-lg font-semibold">Alojamiento no encontrado</p>
+            </div>
+        );
+    }
+
+    const title = accommodation.post?.name || 'Hotel';
+    const price = `Desde $${accommodation.starting_price || 0}`;
+    const destination = accommodation.destination || 'Venezuela';
+
+    const badges = [
+        { icon: <MapPinIcon className="w-5 h-5" />, text: destination },
+    ];
+
+    if (accommodation.stars) {
+        badges.push({
+            icon: <StarIcon weight="fill" className="w-5 h-5 text-amber-500" />,
+            text: `${accommodation.stars} estrellas`,
+        });
+    }
+
+    // Banner
+    const bannerImage = accommodation.post?.banner
+        ? getImageUrl(accommodation.post.banner)
+        : undefined;
+
+    // Galería de imágenes
+    const images = [];
+    if (accommodation.post?.images?.length > 0) {
+        accommodation.post.images.forEach(img => {
+            const url = typeof img === 'string' ? img : img.url;
+            if (url) images.push(getImageUrl(url));
+        });
+    }
+    if (images.length === 0 && accommodation.post?.thumbnail) {
+        images.push(getImageUrl(accommodation.post.thumbnail));
+    }
+
+    // Características del alojamiento
+    const amenities = (accommodation.features || []).map(f => ({
+        icon: f.icon || 'info',
+        label: f.label || 'Servicio',
+    }));
+
+    // Tipos de habitación disponibles
+    const rooms = (accommodation.room_types || []).map(rt => ({
+        id: rt.room_type_ID,
+        name: rt.type,
+    }));
+
+    const details = {
+        destination,
+        stars: accommodation.stars || 0,
+        boardType: accommodation.board_type?.type || 'Consultar',
+        description: accommodation.post?.information || accommodation.post?.overview || 'Descripción no disponible.',
+        amenities,
+    };
+
+    const relatedCards = related.map(a => ({
+        id: a.accommodation_ID,
+        image: a.post?.thumbnail ? getImageUrl(a.post.thumbnail) : mgtathmb,
+        title: a.post?.name || 'Hotel',
+        subtitle: a.post?.overview || '',
+        priceLabel: 'Desde',
+        priceValue: `$${a.starting_price}`,
+        ctaLabel: 'Ver Hotel',
+        link: `/hotel/${a.accommodation_ID}`,
+    }));
 
     return (
         <div className="pb-6">
-            <DetailBanner />
+            <DetailBanner image={bannerImage} />
 
             <DetailHero
-                title={accommodation.title}
-                badges={accommodation.badges}
-                images={accommodation.images}
+                title={title}
+                badges={badges}
+                images={images}
             />
 
             <section className="mx-auto w-full max-w-7xl px-6 sm:px-10 mt-8">
                 <div className="flex flex-col lg:flex-row gap-4 lg:gap-8">
-                    {/* Left side: Information (8/12 approx) */}
                     <div className="lg:w-8/12">
-                        <AccommodationInfo {...accommodation.details} />
+                        <AccommodationInfo {...details} />
                     </div>
-
-                    {/* Right side: Booking form (4/12 approx) */}
                     <div className="lg:w-4/12">
                         <BookingForm
-                            price={accommodation.price}
-                            priceLabel={accommodation.priceLabel}
+                            price={price}
+                            priceLabel="/ noche"
                             isAccommodation={true}
-                            roomTypes={accommodation.rooms}
+                            roomTypes={rooms}
                         />
                     </div>
                 </div>
             </section>
 
-            <LocationMap query={`${accommodation.title}, ${accommodation.details.destination}`} />
+            <LocationMap query={`${title}, ${destination}`} />
 
-            {/* ── Related Accommodations ──────────────────────────────── */}
-            <section className="px-4 sm:px-6 py-10">
-                <PromoCardCarousel
-                    title="Otros alojamientos populares"
-                    subtitle="Explora las mejores opciones de estadía"
-                    verMasHref="/hoteles"
-                    items={[
-                        {
-                            id: 2,
-                            image: mgtathmb,
-                            title: 'Sunsol Isla Caribe',
-                            subtitle: 'Un paraíso familiar con todo incluido',
-                            priceLabel: 'Desde',
-                            priceValue: '$90',
-                            ctaLabel: 'Ver Hotel',
-                            onCtaClick: () => { },
-                        },
-                        {
-                            id: 3,
-                            image: cocthmb,
-                            title: 'Sunsol Punta Blanca',
-                            subtitle: 'Exclusividad de primera frente al mar Caribe',
-                            priceLabel: 'Desde',
-                            priceValue: '$110',
-                            ctaLabel: 'Ver Hotel',
-                            onCtaClick: () => { },
-                        },
-                        {
-                            id: 4,
-                            image: lrqthmb,
-                            title: 'Posada Macanao Lodge',
-                            subtitle: 'Conexión total con la belleza de Los Roques',
-                            priceLabel: 'Desde',
-                            priceValue: '$250',
-                            ctaLabel: 'Ver Hotel',
-                            onCtaClick: () => { },
-                        },
-                    ]}
-                />
-            </section>
+            {relatedCards.length > 0 && (
+                <section className="px-4 sm:px-6 py-10">
+                    <PromoCardCarousel
+                        title="Otros alojamientos populares"
+                        subtitle="Explora las mejores opciones de estadía"
+                        items={relatedCards}
+                    />
+                </section>
+            )}
         </div>
     );
 };

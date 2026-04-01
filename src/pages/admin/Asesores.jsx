@@ -1,8 +1,13 @@
 import React, { useState, useEffect } from 'react';
+import useDocumentTitle from '../../hooks/useDocumentTitle';
 import api from '../../api/axios';
+import { showConfirm } from '../../utils/swal';
 import { UserIcon, PhoneIcon, SpinnerIcon } from '@phosphor-icons/react';
+import { FormImageUpload } from '../../components/dashboard/FormCard';
+import { getImageUrl } from '../../utils/imageHandler';
 
 const Asesores = () => {
+    useDocumentTitle('Asesores');
     const [consultants, setConsultants] = useState([]);
     const [loading, setLoading] = useState(true);
     const [formData, setFormData] = useState({
@@ -59,7 +64,7 @@ const Asesores = () => {
     };
 
     const handleDelete = async (id) => {
-        if (!window.confirm('¿Está seguro de eliminar este asesor?')) return;
+        if (!await showConfirm('¿Está seguro de eliminar este asesor?')) return;
         try {
             await api.delete(`/consultants/${id}`);
             setMessage({ type: 'success', text: 'Asesor eliminado correctamente.' });
@@ -100,7 +105,7 @@ const Asesores = () => {
                             <div key={consultant.id} className="border border-gray-200 rounded-xl p-5 flex flex-col items-center text-center hover:shadow-md transition-shadow">
                                 <div className="w-20 h-20 rounded-full bg-gray-100 mb-4 overflow-hidden border-2 border-white shadow-sm flex items-center justify-center">
                                     {consultant.img ? (
-                                        <img src={consultant.img} alt={consultant.name} className="w-full h-full object-cover" />
+                                        <img src={getImageUrl(consultant.img)} alt={consultant.name} className="w-full h-full object-cover" />
                                     ) : (
                                         <UserIcon className="w-10 h-10 text-gray-400" />
                                     )}
@@ -163,14 +168,11 @@ const Asesores = () => {
                             </div>
 
                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">URL de Imagen (Opcional)</label>
-                                <input
-                                    type="url"
-                                    name="img"
-                                    value={formData.img}
-                                    onChange={handleInputChange}
-                                    className="w-full px-4 py-2 border border-gray-200 rounded-xl focus:ring-2 focus:ring-[#ed6f00] focus:border-transparent outline-none transition-all"
-                                    placeholder="https://ejemplo.com/foto.jpg"
+                                <FormImageUpload 
+                                    label="Foto del Asesor (Opcional)" 
+                                    id="ase-img" 
+                                    value={formData.img} 
+                                    onChange={(e) => handleInputChange({ target: { name: 'img', value: e.target.value } })} 
                                 />
                             </div>
                         </div>

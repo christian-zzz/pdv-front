@@ -1,24 +1,30 @@
-import React from 'react';
+import { Link } from 'react-router-dom';
 
 const PromoCard = ({
     image,
-    imageTag,
-    imageTagSub,
     title,
     subtitle,
     priceLabel,
     priceValue,
     ctaLabel,
+    link,
     onCtaClick,
 }) => {
+    const Wrapper = link ? Link : 'div';
+    const wrapperProps = link ? { to: link } : {};
+
     return (
-        <div className="w-full h-full flex flex-col bg-white rounded-2xl shadow-lg overflow-hidden border border-white/70 group transition-shadow duration-200 hover:shadow-xl">
+        <Wrapper
+            {...wrapperProps}
+            className="w-full h-full flex flex-col bg-white rounded-2xl shadow-lg overflow-hidden border border-white/70 group transition-shadow duration-200 hover:shadow-xl cursor-pointer no-underline"
+        >
             {/* Image — 1:1 aspect ratio, zooms on hover */}
             <div className="relative w-full overflow-hidden shrink-0">
                 <img
                     src={image}
                     alt={title}
                     className="w-full aspect-square object-cover transition-transform duration-300 group-hover:scale-[1.07]"
+                    loading="lazy"
                 />
             </div>
 
@@ -37,16 +43,14 @@ const PromoCard = ({
                         {priceLabel}{' '}
                         <span className="text-[#ed6f00] text-sm font-bold">{priceValue}</span>
                     </p>
-                    <button
-                        type="button"
-                        onClick={onCtaClick}
-                        className="rounded-full bg-[#ed6f00] px-4 py-1.5 text-xs font-semibold text-white shadow-md transition-all duration-200 hover:bg-[#d96200] hover:scale-105 active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#ed6f00] focus-visible:ring-offset-2"
+                    <span
+                        className="rounded-full bg-[#ed6f00] px-4 py-1.5 text-xs font-semibold text-white shadow-md transition-all duration-200 hover:bg-[#d96200] hover:scale-105 active:scale-95"
                     >
                         {ctaLabel}
-                    </button>
+                    </span>
                 </div>
             </div>
-        </div>
+        </Wrapper>
     );
 };
 

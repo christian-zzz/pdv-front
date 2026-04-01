@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import useDocumentTitle from '../../hooks/useDocumentTitle';
 import api from '../../api/axios';
+import { showSuccess, showError, showConfirm, showInfo } from '../../utils/swal';
 import AdminTable from '../../components/dashboard/AdminTable';
 import FormCard, {
     FormInput,
@@ -10,7 +12,10 @@ import FormCard, {
     FormPlaceSearch,
     FormTextarea,
     FormCheckbox,
+    FormImageUpload,
+    FormGalleryUpload,
 } from '../../components/dashboard/FormCard';
+import { getImageUrl } from '../../utils/imageHandler';
 import { CheckIcon, PencilSimpleIcon, ArrowLeftIcon, ArrowRightIcon, ForkKnifeIcon, BedIcon, SparkleIcon, StarIcon, CheckCircleIcon, XCircleIcon, HouseIcon, ImageIcon, ArticleIcon } from '@phosphor-icons/react';
 
 // ── Board-type Spanish label map (DB stores English keys) ────────────────────
@@ -29,7 +34,7 @@ const Thumb = ({ image }) => (
     <div className="w-16 h-16 rounded-xl overflow-hidden shadow-sm shrink-0 mx-auto"
         style={{ background: 'linear-gradient(135deg, #001f6c, #001f6ccc)' }}>
         {image
-            ? <img src={image} alt="" className="w-full h-full object-cover" />
+            ? <img src={getImageUrl(image)} alt="" className="w-full h-full object-cover" />
             : <div className="w-full h-full flex items-center justify-center text-white text-xs font-bold">HT</div>}
     </div>
 );
@@ -116,7 +121,7 @@ const StepIndicator = ({ current, total }) => (
                             {done ? (
                                 <CheckIcon className="w-4 h-4" />
                             ) : (
-                                <span className="flex items-center justify-center translate-y-[-1px]">
+                                <span className="flex items-center justify-center -translate-y-px">
                                     {step.icon}
                                 </span>
                             )}
@@ -173,9 +178,7 @@ const HotelForm = ({ lookups, editRow, onSaved, onCancelEdit }) => {
     const set = (k) => (e) =>
         setForm(f => ({ ...f, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }));
 
-    const galleryValue = form.images.join('\n');
-    const handleGallery = (e) => {
-        const urls = e.target.value.split('\n').map(s => s.trim()).filter(Boolean);
+    const handleGallery = (urls) => {
         setForm(f => ({ ...f, images: urls }));
     };
 
@@ -191,17 +194,17 @@ const HotelForm = ({ lookups, editRow, onSaved, onCancelEdit }) => {
         try {
             if (isEditing) {
                 await api.put(`/accommodations/${editRow.accommodation_ID}`, payload);
-                alert('Alojamiento actualizado exitosamente!');
+                showSuccess('Alojamiento actualizado exitosamente!');
             } else {
                 await api.post('/accommodations', payload);
-                alert('Alojamiento creado exitosamente!');
+                showSuccess('Alojamiento creado exitosamente!');
             }
             setForm(defaultForm());
             setStep(1);
             if (onSaved) onSaved();
         } catch (err) {
             console.error('Error saving accommodation:', err);
-            alert('Error al guardar el alojamiento.');
+            showError('Error al guardar el alojamiento.');
         } finally {
             setSaving(false);
         }
@@ -213,7 +216,7 @@ const HotelForm = ({ lookups, editRow, onSaved, onCancelEdit }) => {
             setForm(f => ({ ...f, room_types: [...f.room_types, res.data.room_type_ID] }));
             if (onSaved) onSaved();
         } catch (err) {
-            alert('Error al crear tipo de habitación.');
+            showError('Error al crear tipo de habitación.');
         }
     };
 
@@ -224,7 +227,7 @@ const HotelForm = ({ lookups, editRow, onSaved, onCancelEdit }) => {
             setForm(f => ({ ...f, board_type_FK: String(res.data.board_type_ID) }));
             if (onSaved) onSaved();
         } catch (err) {
-            alert('Error al crear régimen.');
+            showError('Error al crear régimen.');
         }
     };
 
@@ -316,12 +319,8 @@ const HotelForm = ({ lookups, editRow, onSaved, onCancelEdit }) => {
                             <div className="space-y-5 animate-in fade-in slide-in-from-right-4 duration-200">
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                                     <div className="space-y-4">
-                                        <FormInput label="URL del Banner" id="ht-banner"
-                                            type="url" placeholder="https://..."
-                                            value={form.banner} onChange={set('banner')} />
-                                        <FormInput label="URL del Thumbnail" id="ht-thumbnail"
-                                            type="url" placeholder="https://..."
-                                            value={form.thumbnail} onChange={set('thumbnail')} />
+                                        <FormImageUpload label="URL del Banner" id="ht-banner" value={form.banner} onChange={set('banner')} />
+                                        <FormImageUpload label="URL del Thumbnail" id="ht-thumbnail" value={form.thumbnail} onChange={set('thumbnail')} />
                                     </div>
                                     <div className="space-y-2">
                                         {/* Live preview */}
@@ -330,7 +329,7 @@ const HotelForm = ({ lookups, editRow, onSaved, onCancelEdit }) => {
                                                 {form.banner && (
                                                     <div className="flex-1">
                                                         <p className="text-[10px] font-semibold text-[#001f6c]/60 uppercase mb-1">Banner</p>
-                                                        <img src={form.banner} alt="Banner preview"
+                                                        <img src={getImageUrl(form.banner)} alt="Banner preview"
                                                             className="w-full h-24 object-cover rounded-lg border border-gray-200"
                                                             onError={(e) => { e.target.style.display = 'none'; }} />
                                                     </div>
@@ -338,7 +337,7 @@ const HotelForm = ({ lookups, editRow, onSaved, onCancelEdit }) => {
                                                 {form.thumbnail && (
                                                     <div className="w-24">
                                                         <p className="text-[10px] font-semibold text-[#001f6c]/60 uppercase mb-1">Thumbnail</p>
-                                                        <img src={form.thumbnail} alt="Thumbnail preview"
+                                                        <img src={getImageUrl(form.thumbnail)} alt="Thumbnail preview"
                                                             className="w-24 h-24 object-cover rounded-lg border border-gray-200"
                                                             onError={(e) => { e.target.style.display = 'none'; }} />
                                                     </div>
@@ -349,26 +348,14 @@ const HotelForm = ({ lookups, editRow, onSaved, onCancelEdit }) => {
                                 </div>
 
                                 <div className="flex flex-col gap-1">
-                                    <label htmlFor="ht-images" className="text-xs font-semibold text-[#001f6c]">
-                                        URLs de Galería{' '}
-                                        <span className="font-normal text-gray-400">(una URL por línea)</span>
-                                    </label>
-                                    <textarea
-                                        id="ht-images"
-                                        rows={6}
-                                        value={galleryValue}
-                                        onChange={handleGallery}
-                                        placeholder={"https://imagen1.jpg\nhttps://imagen2.jpg\nhttps://imagen3.jpg"}
-                                        className="w-full rounded-lg border border-[#ed6f00]/50 bg-white px-3 py-2 text-sm text-[#001f6c] placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#ed6f00]/40 transition resize-y font-mono"
-                                    />
-                                    <p className="text-[11px] text-gray-400">{form.images.length} imagen(es) en galería</p>
+                                    <FormGalleryUpload label="URLs de Galería" id="ht-images" value={form.images} onChange={handleGallery} />
                                 </div>
 
                                 {/* Gallery preview chips */}
                                 {form.images.length > 0 && (
                                     <div className="grid grid-cols-3 sm:grid-cols-6 gap-2">
                                         {form.images.map((url, i) => (
-                                            <img key={i} src={url} alt={`Galería ${i + 1}`}
+                                            <img key={i} src={getImageUrl(url)} alt={`Galería ${i + 1}`}
                                                 className="h-16 w-full object-cover rounded-lg border border-gray-200"
                                                 onError={(e) => { e.target.style.opacity = '0.3'; }} />
                                         ))}
@@ -465,6 +452,7 @@ const HotelForm = ({ lookups, editRow, onSaved, onCancelEdit }) => {
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 const Hoteles = () => {
+    useDocumentTitle('Hoteles');
     const [accommodations, setAccommodations] = useState([]);
     const [lookups, setLookups] = useState({ boardTypes: [], roomTypes: [] });
     const [loading, setLoading] = useState(true);
@@ -501,13 +489,13 @@ const Hoteles = () => {
 
     const handleArchive = async (row) => {
         const name = row['post.name'] || row.post?.name || 'este alojamiento';
-        if (!window.confirm(`¿Eliminar "${name}"? Esta acción no se puede deshacer.`)) return;
+        if (!await showConfirm(`¿Eliminar "${name}"? Esta acción no se puede deshacer.`)) return;
         try {
             await api.delete(`/accommodations/${row.accommodation_ID}`);
             fetchData();
         } catch (err) {
             console.error('Error deleting accommodation:', err);
-            alert('Error al eliminar el alojamiento.');
+            showError('Error al eliminar el alojamiento.');
         }
     };
 
@@ -525,7 +513,7 @@ const Hoteles = () => {
                     data={accommodations}
                     pageSize={10}
                     onNew={() => { setEditRow(null); document.getElementById('form-hotel')?.scrollIntoView({ behavior: 'smooth' }); }}
-                    onView={(row) => alert(`Vista previa: ${row['post.name']}`)}
+                    onView={(row) => showInfo(`Vista previa: ${row['post.name']}`)}
                     onEdit={handleEdit}
                     onArchive={handleArchive}
                 />

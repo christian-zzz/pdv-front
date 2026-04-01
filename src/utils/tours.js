@@ -167,9 +167,14 @@ export const startTourByRole = (role) => {
         progressText: 'Paso {{current}} de {{total}}',
         steps: steps,
         // Optional: Custom styling via CSS variables
-        onDestroyStarted: () => {
-            if (!driverObj.hasNextStep() || confirm("¿Seguro que deseas salir del tour?")) {
+        onDestroyStarted: async () => {
+            if (!driverObj.hasNextStep()) {
                 driverObj.destroy();
+            } else {
+                const { showConfirm } = await import('./swal');
+                if (await showConfirm('¿Seguro que deseas salir del tour?')) {
+                    driverObj.destroy();
+                }
             }
         },
     });

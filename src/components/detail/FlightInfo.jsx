@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
+import { getFeatureIcon } from '../../utils/featureIcons';
 import { MapPinIcon, FileTextIcon, UsersIcon, ForkKnifeIcon, CaretDownIcon, CheckIcon } from '@phosphor-icons/react';
 
 /**
@@ -12,7 +13,7 @@ import { MapPinIcon, FileTextIcon, UsersIcon, ForkKnifeIcon, CaretDownIcon, Chec
  * @param {Array}    requirements       — list of string requirements
  * @param {Array}    amenities          — [{ icon: ReactNode, label: string }]
  */
-const FlightInfo = ({ destination, requirementsShort, guestType, boardType, description, requirements = [], amenities = [] }) => {
+const FlightInfo = ({ destination, country, requirementsShort, guestType, boardType, description, requirements = [], amenities = [] }) => {
     const [expanded, setExpanded] = useState(false);
 
     const highlights = [
@@ -82,7 +83,7 @@ const FlightInfo = ({ destination, requirementsShort, guestType, boardType, desc
             {/* ── Travel Requirements ─────────────────────────────────────── */}
             {requirements && requirements.length > 0 && (
                 <div>
-                    <h2 className="text-2xl font-bold text-[#001f6c] mb-4">Para ingresar a Colombia desde Venezuela</h2>
+                    <h2 className="text-2xl font-bold text-[#001f6c] mb-4">Para ingresar a {country || destination} desde Venezuela</h2>
                     <ul className="space-y-3">
                         {requirements.map((req, i) => (
                             <li key={i} className="flex items-start gap-3">
@@ -106,7 +107,7 @@ const FlightInfo = ({ destination, requirementsShort, guestType, boardType, desc
                                 key={i}
                                 className="flex items-center gap-2.5 bg-gray-50 border border-gray-100 rounded-xl px-4 py-3 h-14 text-sm font-medium text-[#001f6c]/80"
                             >
-                                <span className="shrink-0 text-gray-400">{a.icon}</span>
+                                <span className="shrink-0 text-[#ed6f00]">{typeof a.icon === 'string' ? getFeatureIcon(a.icon) : a.icon}</span>
                                 {a.label}
                             </div>
                         ))}

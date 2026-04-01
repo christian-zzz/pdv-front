@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import useDocumentTitle from '../../hooks/useDocumentTitle';
 import AdminTable from '../../components/dashboard/AdminTable';
 import FormCard, { FormSelect } from '../../components/dashboard/FormCard';
 import api from '../../api/axios';
@@ -31,6 +32,7 @@ const COLUMNS = [
 ];
 
 const Consultas = () => {
+    useDocumentTitle('Consultas');
     const [inquiries, setInquiries] = useState([]);
     const [consultants, setConsultants] = useState([]);
     const [loading, setLoading] = useState(true);

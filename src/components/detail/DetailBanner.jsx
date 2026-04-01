@@ -1,5 +1,4 @@
-import React from 'react';
-import bannerImg from '../../assets/bannerdetail.jpg';
+import bannerImg from '../../assets/bannerdetail.webp';
 
 const DetailBanner = ({ image = bannerImg }) => {
     return (

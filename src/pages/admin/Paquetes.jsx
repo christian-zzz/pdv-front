@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import useDocumentTitle from '../../hooks/useDocumentTitle';
 import api from '../../api/axios';
+import { showSuccess, showError, showConfirm } from '../../utils/swal';
 import AdminTable from '../../components/dashboard/AdminTable';
 import FormCard, {
     FormInput,
@@ -7,7 +9,10 @@ import FormCard, {
     FormFeatureList,
     FormTextarea,
     FormCheckbox,
+    FormImageUpload,
+    FormGalleryUpload,
 } from '../../components/dashboard/FormCard';
+import { getImageUrl } from '../../utils/imageHandler';
 import { CheckIcon, PencilSimpleIcon, ArrowLeftIcon, ArrowRightIcon, ForkKnifeIcon, CalendarIcon, UsersIcon, BedIcon, StarIcon, CheckCircleIcon, XCircleIcon, HouseIcon, ImageIcon, ArticleIcon } from '@phosphor-icons/react';
 
 // ── Board-type Spanish label map (DB stores English keys) ────────────────────
@@ -26,7 +31,7 @@ const Thumb = ({ image }) => (
     <div className="w-16 h-16 rounded-xl overflow-hidden shadow-sm shrink-0 mx-auto"
         style={{ background: 'linear-gradient(135deg, #001f6c, #001f6ccc)' }}>
         {image
-            ? <img src={image} alt="" className="w-full h-full object-cover" />
+            ? <img src={getImageUrl(image)} alt="" className="w-full h-full object-cover" />
             : <div className="w-full h-full flex items-center justify-center text-white text-xs font-bold">PQ</div>}
     </div>
 );
@@ -177,9 +182,7 @@ const PaqueteForm = ({ lookups, editRow, onSaved, onCancelEdit }) => {
         setNightsCount(Math.min(daysCount, val));
     };
 
-    const galleryValue = form.images.join('\n');
-    const handleGallery = (e) => {
-        const urls = e.target.value.split('\n').map(s => s.trim()).filter(Boolean);
+    const handleGallery = (urls) => {
         setForm(f => ({ ...f, images: urls }));
     };
 
@@ -197,17 +200,17 @@ const PaqueteForm = ({ lookups, editRow, onSaved, onCancelEdit }) => {
         try {
             if (isEditing) {
                 await api.put(`/packages/${editRow.packages_ID}`, payload);
-                alert('Paquete actualizado exitosamente!');
+                showSuccess('Paquete actualizado exitosamente!');
             } else {
                 await api.post('/packages', payload);
-                alert('Paquete creado exitosamente!');
+                showSuccess('Paquete creado exitosamente!');
             }
             setForm(defaultForm());
             setStep(1);
             if (onSaved) onSaved();
         } catch (err) {
             console.error('Error saving package:', err);
-            alert('Error al guardar el paquete.');
+            showError('Error al guardar el paquete.');
         } finally { setSaving(false); }
     };
 
@@ -218,7 +221,7 @@ const PaqueteForm = ({ lookups, editRow, onSaved, onCancelEdit }) => {
             const formKey = type === 'accommodations' ? 'accommodation_FK' : type === 'guest-types' ? 'guest_type_FK' : 'board_type_FK';
             setForm(f => ({ ...f, [formKey]: String(res.data[idKey]) }));
             if (onSaved) onSaved();
-        } catch (err) { alert('Error al crear opción.'); }
+        } catch (err) { showError('Error al crear opción.'); }
     };
 
     return (
@@ -268,22 +271,20 @@ const PaqueteForm = ({ lookups, editRow, onSaved, onCancelEdit }) => {
                             <div className="space-y-5 animate-in fade-in duration-200">
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                                     <div className="space-y-4">
-                                        <FormInput label="URL del Banner" id="pkg-banner" type="url" placeholder="https://..." value={form.banner} onChange={set('banner')} />
-                                        <FormInput label="URL del Thumbnail" id="pkg-thumbnail" type="url" placeholder="https://..." value={form.thumbnail} onChange={set('thumbnail')} />
+                                        <FormImageUpload label="URL del Banner" id="pkg-banner" value={form.banner} onChange={set('banner')} />
+                                        <FormImageUpload label="URL del Thumbnail" id="pkg-thumbnail" value={form.thumbnail} onChange={set('thumbnail')} />
                                     </div>
                                     <div>
                                         {(form.banner || form.thumbnail) && (
                                             <div className="flex gap-3 mb-2">
-                                                {form.banner && <div className="flex-1"><p className="text-[10px] font-semibold text-[#001f6c]/60 uppercase mb-1">Banner</p><img src={form.banner} alt="Banner" className="w-full h-24 object-cover rounded-lg border border-gray-200" onError={(e) => e.target.style.display = 'none'} /></div>}
-                                                {form.thumbnail && <div className="w-24"><p className="text-[10px] font-semibold text-[#001f6c]/60 uppercase mb-1">Thumbnail</p><img src={form.thumbnail} alt="Thumbnail" className="w-24 h-24 object-cover rounded-lg border border-gray-200" onError={(e) => e.target.style.display = 'none'} /></div>}
+                                                {form.banner && <div className="flex-1"><p className="text-[10px] font-semibold text-[#001f6c]/60 uppercase mb-1">Banner</p><img src={getImageUrl(form.banner)} alt="Banner" className="w-full h-24 object-cover rounded-lg border border-gray-200" onError={(e) => e.target.style.display = 'none'} /></div>}
+                                                {form.thumbnail && <div className="w-24"><p className="text-[10px] font-semibold text-[#001f6c]/60 uppercase mb-1">Thumbnail</p><img src={getImageUrl(form.thumbnail)} alt="Thumbnail" className="w-24 h-24 object-cover rounded-lg border border-gray-200" onError={(e) => e.target.style.display = 'none'} /></div>}
                                             </div>
                                         )}
                                     </div>
                                 </div>
                                 <div className="flex flex-col gap-1">
-                                    <label htmlFor="pkg-images" className="text-xs font-semibold text-[#001f6c]">URLs de Galería <span className="font-normal text-gray-400">(una por línea)</span></label>
-                                    <textarea id="pkg-images" rows={6} value={galleryValue} onChange={handleGallery} placeholder={"https://..."} className="w-full rounded-lg border border-[#ed6f00]/50 bg-white px-3 py-2 text-sm text-[#001f6c] focus:outline-none focus:ring-2 focus:ring-[#ed6f00]/40 transition font-mono" />
-                                    <p className="text-[11px] text-gray-400">{form.images.length} imágenes</p>
+                                    <FormGalleryUpload label="URLs de Galería" id="pkg-images" value={form.images} onChange={handleGallery} />
                                 </div>
                             </div>
                         )}
@@ -318,6 +319,7 @@ const PaqueteForm = ({ lookups, editRow, onSaved, onCancelEdit }) => {
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 const Paquetes = () => {
+    useDocumentTitle('Paquetes');
     const [packages, setPackages] = useState([]);
     const [lookups, setLookups] = useState({ accommodations: [], guestTypes: [], boardTypes: [] });
     const [loading, setLoading] = useState(true);
@@ -335,8 +337,8 @@ const Paquetes = () => {
     useEffect(() => { fetchData(); }, []);
 
     const handleArchive = async (row) => {
-        if (!window.confirm(`¿Eliminar "${row['post.name']}"?`)) return;
-        try { await api.delete(`/packages/${row.packages_ID}`); fetchData(); } catch (err) { alert('Error al eliminar.'); }
+        if (!await showConfirm(`¿Eliminar "${row['post.name']}"?`)) return;
+        try { await api.delete(`/packages/${row.packages_ID}`); fetchData(); } catch (err) { showError('Error al eliminar.'); }
     };
 
     return (

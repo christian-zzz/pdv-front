@@ -1,50 +1,55 @@
+import { lazy, Suspense } from 'react';
 import { createBrowserRouter } from 'react-router-dom';
 import Layout from './layouts/Layout';
 import DashboardLayout from './layouts/DashboardLayout';
-import Home from './pages/Home';
-import PackageDetail from './pages/PackageDetail';
-import FlightDetail from './pages/FlightDetail';
-import AccommodationDetail from './pages/AccommodationDetail';
-import Dashboard from './pages/Dashboard';
-import Paquetes from './pages/admin/Paquetes';
-import Vuelos from './pages/admin/Vuelos';
-import Hoteles from './pages/admin/Hoteles';
-import Blog from './pages/admin/Blog';
-import Consultas from './pages/admin/Consultas';
-import Asesores from './pages/admin/Asesores';
-import Usuarios from './pages/admin/Usuarios';
-import WhatsappSettings from './pages/admin/WhatsappSettings';
-import Ayuda from './pages/admin/Ayuda';
-import Login from './pages/Login';
 import ProtectedRoute from './components/common/ProtectedRoute';
 import RoleRoute from './components/common/RoleRoute';
+
+// Lazy-loaded pages — each becomes its own chunk
+const Home = lazy(() => import('./pages/Home'));
+const Contacto = lazy(() => import('./pages/Contacto'));
+const PackageDetail = lazy(() => import('./pages/PackageDetail'));
+const FlightDetail = lazy(() => import('./pages/FlightDetail'));
+const AccommodationDetail = lazy(() => import('./pages/AccommodationDetail'));
+const Login = lazy(() => import('./pages/Login'));
+const Dashboard = lazy(() => import('./pages/Dashboard'));
+const Paquetes = lazy(() => import('./pages/admin/Paquetes'));
+const Vuelos = lazy(() => import('./pages/admin/Vuelos'));
+const Hoteles = lazy(() => import('./pages/admin/Hoteles'));
+const Blog = lazy(() => import('./pages/admin/Blog'));
+const Consultas = lazy(() => import('./pages/admin/Consultas'));
+const Asesores = lazy(() => import('./pages/admin/Asesores'));
+const Usuarios = lazy(() => import('./pages/admin/Usuarios'));
+const WhatsappSettings = lazy(() => import('./pages/admin/WhatsappSettings'));
+const Ayuda = lazy(() => import('./pages/admin/Ayuda'));
+const Informacion = lazy(() => import('./pages/admin/Informacion'));
+const Imagenes = lazy(() => import('./pages/admin/Imagenes'));
+const Contenido = lazy(() => import('./pages/admin/Contenido'));
+
+// Shared loading fallback
+const PageLoader = () => (
+    <div className="min-h-screen flex items-center justify-center">
+        <div className="w-10 h-10 border-4 border-[#001f6c] border-t-transparent rounded-full animate-spin"></div>
+    </div>
+);
+
+const withSuspense = (Component) => (
+    <Suspense fallback={<PageLoader />}>
+        <Component />
+    </Suspense>
+);
 
 const router = createBrowserRouter([
     {
         path: '/',
         element: <Layout />,
         children: [
-            {
-                path: '/',
-                element: <Home />,
-            },
-            // Add other public routes here
-            {
-                path: 'package/:id',
-                element: <PackageDetail />,
-            },
-            {
-                path: 'vuelo/:id',
-                element: <FlightDetail />,
-            },
-            {
-                path: 'hotel/:id',
-                element: <AccommodationDetail />,
-            },
-            {
-                path: 'login',
-                element: <Login />,
-            },
+            { path: '/', element: withSuspense(Home) },
+            { path: 'contacto', element: withSuspense(Contacto) },
+            { path: 'package/:id', element: withSuspense(PackageDetail) },
+            { path: 'vuelo/:id', element: withSuspense(FlightDetail) },
+            { path: 'hotel/:id', element: withSuspense(AccommodationDetail) },
+            { path: 'login', element: withSuspense(Login) },
         ],
     },
     {
@@ -55,47 +60,19 @@ const router = createBrowserRouter([
             </ProtectedRoute>
         ),
         children: [
-            { index: true, element: <Dashboard /> },
-            {
-                path: 'paquetes',
-                element: <RoleRoute allowedRoles={[1, 2]}><Paquetes /></RoleRoute>
-            },
-            {
-                path: 'vuelos',
-                element: <RoleRoute allowedRoles={[1, 2]}><Vuelos /></RoleRoute>
-            },
-            {
-                path: 'hoteles',
-                element: <RoleRoute allowedRoles={[1, 2]}><Hoteles /></RoleRoute>
-            },
-            {
-                path: 'blog',
-                element: <RoleRoute allowedRoles={[1, 2]}><Blog /></RoleRoute>
-            },
-            {
-                path: 'consultas',
-                element: <RoleRoute allowedRoles={[1, 3]}><Consultas /></RoleRoute>
-            },
-            {
-                path: 'asesores',
-                element: <RoleRoute allowedRoles={[1, 3]}><Asesores /></RoleRoute>
-            },
-            {
-                path: 'usuarios',
-                element: <RoleRoute allowedRoles={[1]}><Usuarios /></RoleRoute>
-            },
-            {
-                path: 'whatsapp',
-                element: <RoleRoute allowedRoles={[1, 3]}><WhatsappSettings /></RoleRoute>
-            },
-            {
-                path: 'ayuda',
-                element: <RoleRoute allowedRoles={[1, 2, 3]}><Ayuda /></RoleRoute>
-            },
-            // Editar Página sub-routes:
-            // { path: 'informacion',  element: <RoleRoute allowedRoles={[1, 2]}><Informacion /></RoleRoute> },
-            // { path: 'imagenes',     element: <RoleRoute allowedRoles={[1, 2]}><Imagenes /></RoleRoute> },
-            // { path: 'contenido',    element: <RoleRoute allowedRoles={[1, 2]}><Contenido /></RoleRoute> },
+            { index: true, element: withSuspense(Dashboard) },
+            { path: 'paquetes', element: <RoleRoute allowedRoles={[1, 2]}>{withSuspense(Paquetes)}</RoleRoute> },
+            { path: 'vuelos', element: <RoleRoute allowedRoles={[1, 2]}>{withSuspense(Vuelos)}</RoleRoute> },
+            { path: 'hoteles', element: <RoleRoute allowedRoles={[1, 2]}>{withSuspense(Hoteles)}</RoleRoute> },
+            { path: 'blog', element: <RoleRoute allowedRoles={[1, 2]}>{withSuspense(Blog)}</RoleRoute> },
+            { path: 'consultas', element: <RoleRoute allowedRoles={[1, 3]}>{withSuspense(Consultas)}</RoleRoute> },
+            { path: 'asesores', element: <RoleRoute allowedRoles={[1, 3]}>{withSuspense(Asesores)}</RoleRoute> },
+            { path: 'usuarios', element: <RoleRoute allowedRoles={[1]}>{withSuspense(Usuarios)}</RoleRoute> },
+            { path: 'whatsapp', element: <RoleRoute allowedRoles={[1, 3]}>{withSuspense(WhatsappSettings)}</RoleRoute> },
+            { path: 'ayuda', element: <RoleRoute allowedRoles={[1, 2, 3]}>{withSuspense(Ayuda)}</RoleRoute> },
+            { path: 'informacion', element: <RoleRoute allowedRoles={[1, 2]}>{withSuspense(Informacion)}</RoleRoute> },
+            { path: 'imagenes', element: <RoleRoute allowedRoles={[1, 2]}>{withSuspense(Imagenes)}</RoleRoute> },
+            { path: 'contenido', element: <RoleRoute allowedRoles={[1, 2]}>{withSuspense(Contenido)}</RoleRoute> },
         ],
     },
 ]);

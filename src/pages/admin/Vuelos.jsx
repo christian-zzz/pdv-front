@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import useDocumentTitle from '../../hooks/useDocumentTitle';
 import api from '../../api/axios';
+import { showSuccess, showError, showConfirm } from '../../utils/swal';
 import AdminTable from '../../components/dashboard/AdminTable';
 import FormCard, {
     FormInput,
@@ -11,7 +13,10 @@ import FormCard, {
     FormFeatureList,
     FormDynamicList,
     FormInteractiveMap,
+    FormImageUpload,
+    FormGalleryUpload,
 } from '../../components/dashboard/FormCard';
+import { getImageUrl } from '../../utils/imageHandler';
 import { CheckIcon, PencilSimpleIcon, ArrowLeftIcon, ArrowRightIcon, ForkKnifeIcon, CalendarIcon, UsersIcon, MapPinIcon, GlobeIcon, StarIcon, CheckCircleIcon, XCircleIcon, HouseIcon, ImageIcon, ArticleIcon } from '@phosphor-icons/react';
 
 // ── Board-type Spanish label map (DB stores English keys) ────────────────────
@@ -30,7 +35,7 @@ const Thumb = ({ image }) => (
     <div className="w-16 h-16 rounded-xl overflow-hidden shadow-sm shrink-0 mx-auto"
         style={{ background: 'linear-gradient(135deg, #001f6c, #001f6ccc)' }}>
         {image
-            ? <img src={image} alt="" className="w-full h-full object-cover" />
+            ? <img src={getImageUrl(image)} alt="" className="w-full h-full object-cover" />
             : <div className="w-full h-full flex items-center justify-center text-white text-xs font-bold">VL</div>}
     </div>
 );
@@ -84,7 +89,7 @@ const StepIndicator = ({ current }) => (
                             ${active ? 'bg-[#001f6c] border-[#001f6c] text-white ring-4 ring-[#001f6c]/20' : ''}
                             ${!done && !active ? 'bg-white border-gray-200 text-gray-400' : ''}
                         `}>
-                            {done ? <CheckIcon className="w-4 h-4" /> : <span className="flex items-center justify-center translate-y-[-1px]">{step.icon}</span>}
+                            {done ? <CheckIcon className="w-4 h-4" /> : <span className="flex items-center justify-center -translate-y-px">{step.icon}</span>}
                         </div>
                         <span className={`text-[11px] font-semibold text-center leading-tight ${active ? 'text-[#001f6c]' : done ? 'text-[#ed6f00]' : 'text-gray-400'}`}>
                             {step.label}
@@ -156,9 +161,7 @@ const VueloForm = ({ lookups, editRow, onSaved, onCancelEdit }) => {
         });
     };
 
-    const galleryValue = form.images.join('\n');
-    const handleGallery = (e) => {
-        const urls = e.target.value.split('\n').map(s => s.trim()).filter(Boolean);
+    const handleGallery = (urls) => {
         setForm(f => ({ ...f, images: urls }));
     };
 
@@ -173,17 +176,17 @@ const VueloForm = ({ lookups, editRow, onSaved, onCancelEdit }) => {
         try {
             if (isEditing) {
                 await api.put(`/flights/${editRow.flights_ID}`, payload);
-                alert('Vuelo / Destino actualizado exitosamente!');
+                showSuccess('Vuelo / Destino actualizado exitosamente!');
             } else {
                 await api.post('/flights', payload);
-                alert('Vuelo / Destino creado exitosamente!');
+                showSuccess('Vuelo / Destino creado exitosamente!');
             }
             setForm(defaultForm());
             setStep(1);
             if (onSaved) onSaved();
         } catch (err) {
             console.error('Error saving flight:', err);
-            alert('Error al guardar el vuelo.');
+            showError('Error al guardar el vuelo.');
         } finally { setSaving(false); }
     };
 
@@ -194,7 +197,7 @@ const VueloForm = ({ lookups, editRow, onSaved, onCancelEdit }) => {
             const formKey = type === 'countries' ? 'country_FK' : 'other_FK';
             setForm(f => ({ ...f, [formKey]: String(res.data[idKey]) }));
             if (onSaved) onSaved();
-        } catch (err) { alert('Error al crear opción.'); }
+        } catch (err) { showError('Error al crear opción.'); }
     };
 
     return (
@@ -237,22 +240,20 @@ const VueloForm = ({ lookups, editRow, onSaved, onCancelEdit }) => {
                             <div className="space-y-5 animate-in fade-in duration-200">
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                                     <div className="space-y-4">
-                                        <FormInput label="URL del Banner" id="vl-banner" type="url" placeholder="https://..." value={form.banner} onChange={set('banner')} />
-                                        <FormInput label="URL del Thumbnail" id="vl-thumbnail" type="url" placeholder="https://..." value={form.thumbnail} onChange={set('thumbnail')} />
+                                        <FormImageUpload label="URL del Banner" id="vl-banner" value={form.banner} onChange={set('banner')} />
+                                        <FormImageUpload label="URL del Thumbnail" id="vl-thumbnail" value={form.thumbnail} onChange={set('thumbnail')} />
                                     </div>
                                     <div>
                                         {(form.banner || form.thumbnail) && (
                                             <div className="flex gap-3 mb-2">
-                                                {form.banner && <div className="flex-1"><p className="text-[10px] font-semibold text-[#001f6c]/60 uppercase mb-1">Banner</p><img src={form.banner} alt="Banner" className="w-full h-24 object-cover rounded-lg border border-gray-200" onError={(e) => e.target.style.display = 'none'} /></div>}
-                                                {form.thumbnail && <div className="w-24"><p className="text-[10px] font-semibold text-[#001f6c]/60 uppercase mb-1">Thumbnail</p><img src={form.thumbnail} alt="Thumbnail" className="w-24 h-24 object-cover rounded-lg border border-gray-200" onError={(e) => e.target.style.display = 'none'} /></div>}
+                                                {form.banner && <div className="flex-1"><p className="text-[10px] font-semibold text-[#001f6c]/60 uppercase mb-1">Banner</p><img src={getImageUrl(form.banner)} alt="Banner" className="w-full h-24 object-cover rounded-lg border border-gray-200" onError={(e) => e.target.style.display = 'none'} /></div>}
+                                                {form.thumbnail && <div className="w-24"><p className="text-[10px] font-semibold text-[#001f6c]/60 uppercase mb-1">Thumbnail</p><img src={getImageUrl(form.thumbnail)} alt="Thumbnail" className="w-24 h-24 object-cover rounded-lg border border-gray-200" onError={(e) => e.target.style.display = 'none'} /></div>}
                                             </div>
                                         )}
                                     </div>
                                 </div>
                                 <div className="flex flex-col gap-1">
-                                    <label htmlFor="vl-images" className="text-xs font-semibold text-[#001f6c]">URLs de Galería <span className="font-normal text-gray-400">(una por línea)</span></label>
-                                    <textarea id="vl-images" rows={6} value={galleryValue} onChange={handleGallery} placeholder={"https://..."} className="w-full rounded-lg border border-[#ed6f00]/50 bg-white px-3 py-2 text-sm text-[#001f6c] focus:outline-none focus:ring-2 focus:ring-[#ed6f00]/40 transition font-mono" />
-                                    <p className="text-[11px] text-gray-400">{form.images.length} imágenes</p>
+                                    <FormGalleryUpload label="URLs de Galería" id="vl-images" value={form.images} onChange={handleGallery} />
                                 </div>
                             </div>
                         )}
@@ -288,6 +289,7 @@ const VueloForm = ({ lookups, editRow, onSaved, onCancelEdit }) => {
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 const Vuelos = () => {
+    useDocumentTitle('Vuelos');
     const [flights, setFlights] = useState([]);
     const [lookups, setLookups] = useState({ countries: [], guestTypes: [], boardTypes: [] });
     const [loading, setLoading] = useState(true);
@@ -305,8 +307,8 @@ const Vuelos = () => {
     useEffect(() => { fetchData(); }, []);
 
     const handleArchive = async (row) => {
-        if (!window.confirm(`¿Eliminar "${row['post.name']}"?`)) return;
-        try { await api.delete(`/flights/${row.flights_ID}`); fetchData(); } catch (err) { alert('Error al eliminar.'); }
+        if (!await showConfirm(`¿Eliminar "${row['post.name']}"?`)) return;
+        try { await api.delete(`/flights/${row.flights_ID}`); fetchData(); } catch (err) { showError('Error al eliminar.'); }
     };
 
     return (

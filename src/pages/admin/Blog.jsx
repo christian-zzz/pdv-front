@@ -1,12 +1,17 @@
 import React, { useState, useEffect } from 'react';
+import useDocumentTitle from '../../hooks/useDocumentTitle';
 import api from '../../api/axios';
+import { showSuccess, showError, showConfirm } from '../../utils/swal';
 import AdminTable from '../../components/dashboard/AdminTable';
 import FormCard, {
     FormInput,
     FormSelectCreatable,
     FormMultiSelect,
     FormTextarea,
+    FormImageUpload,
+    FormGalleryUpload,
 } from '../../components/dashboard/FormCard';
+import { getImageUrl } from '../../utils/imageHandler';
 import { CheckIcon, PencilSimpleIcon, ArrowLeftIcon, ArrowRightIcon, ArticleIcon, TagIcon, ListIcon, HouseIcon, ImageIcon } from '@phosphor-icons/react';
 
 // ── Thumbnail cell ────────────────────────────────────────────────────────────
@@ -14,7 +19,7 @@ const Thumb = ({ image }) => (
     <div className="w-16 h-16 rounded-xl overflow-hidden shadow-sm shrink-0 mx-auto"
         style={{ background: 'linear-gradient(135deg, #001f6c, #001f6ccc)' }}>
         {image
-            ? <img src={image} alt="" className="w-full h-full object-cover" />
+            ? <img src={getImageUrl(image)} alt="" className="w-full h-full object-cover" />
             : <div className="w-full h-full flex items-center justify-center text-white text-xs font-bold">BL</div>}
     </div>
 );
@@ -70,7 +75,7 @@ const StepIndicator = ({ current }) => (
                             ${active ? 'bg-[#001f6c] border-[#001f6c] text-white ring-4 ring-[#001f6c]/20' : ''}
                             ${!done && !active ? 'bg-white border-gray-200 text-gray-400' : ''}
                         `}>
-                            {done ? <CheckIcon className="w-4 h-4" /> : <span className="flex items-center justify-center translate-y-[-1px]">{step.icon}</span>}
+                            {done ? <CheckIcon className="w-4 h-4" /> : <span className="flex items-center justify-center -translate-y-px">{step.icon}</span>}
                         </div>
                         <span className={`text-[11px] font-semibold text-center leading-tight ${active ? 'text-[#001f6c]' : done ? 'text-[#ed6f00]' : 'text-gray-400'}`}>
                             {step.label}
@@ -111,9 +116,7 @@ const BlogForm = ({ lookups, editRow, onSaved, onCancelEdit }) => {
     const set = (k) => (e) =>
         setForm(f => ({ ...f, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }));
 
-    const galleryValue = form.images.join('\n');
-    const handleGallery = (e) => {
-        const urls = e.target.value.split('\n').map(s => s.trim()).filter(Boolean);
+    const handleGallery = (urls) => {
         setForm(f => ({ ...f, images: urls }));
     };
 
@@ -127,17 +130,17 @@ const BlogForm = ({ lookups, editRow, onSaved, onCancelEdit }) => {
         try {
             if (isEditing) {
                 await api.put(`/blog-posts/${editRow.blog_post_ID}`, payload);
-                alert('Publicación de Blog actualizada exitosamente!');
+                showSuccess('Publicación de Blog actualizada exitosamente!');
             } else {
                 await api.post('/blog-posts', payload);
-                alert('Publicación de Blog creada exitosamente!');
+                showSuccess('Publicación de Blog creada exitosamente!');
             }
             setForm(defaultForm());
             setStep(1);
             if (onSaved) onSaved();
         } catch (err) {
             console.error('Error saving blog post:', err);
-            alert('Error al guardar la publicación.');
+            showError('Error al guardar la publicación.');
         } finally {
             setSaving(false);
         }
@@ -155,7 +158,7 @@ const BlogForm = ({ lookups, editRow, onSaved, onCancelEdit }) => {
             }
             if (onSaved) onSaved();
         } catch (err) {
-            alert('Error al crear opción.');
+            showError('Error al crear opción.');
         }
     };
 
@@ -191,22 +194,20 @@ const BlogForm = ({ lookups, editRow, onSaved, onCancelEdit }) => {
                             <div className="space-y-5 animate-in fade-in duration-200">
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
                                     <div className="space-y-4">
-                                        <FormInput label="URL del Banner" id="bl-banner" type="url" placeholder="https://..." value={form.banner} onChange={set('banner')} />
-                                        <FormInput label="URL del Thumbnail" id="bl-thumbnail" type="url" placeholder="https://..." value={form.thumbnail} onChange={set('thumbnail')} />
+                                        <FormImageUpload label="URL del Banner" id="bl-banner" value={form.banner} onChange={set('banner')} />
+                                        <FormImageUpload label="URL del Thumbnail" id="bl-thumbnail" value={form.thumbnail} onChange={set('thumbnail')} />
                                     </div>
                                     <div>
                                         {(form.banner || form.thumbnail) && (
                                             <div className="flex gap-3 mb-2">
-                                                {form.banner && <div className="flex-1"><p className="text-[10px] font-semibold text-[#001f6c]/60 uppercase mb-1">Banner</p><img src={form.banner} alt="Banner" className="w-full h-24 object-cover rounded-lg border border-gray-200" onError={(e) => e.target.style.display = 'none'} /></div>}
-                                                {form.thumbnail && <div className="w-24"><p className="text-[10px] font-semibold text-[#001f6c]/60 uppercase mb-1">Thumbnail</p><img src={form.thumbnail} alt="Thumbnail" className="w-24 h-24 object-cover rounded-lg border border-gray-200" onError={(e) => e.target.style.display = 'none'} /></div>}
+                                                {form.banner && <div className="flex-1"><p className="text-[10px] font-semibold text-[#001f6c]/60 uppercase mb-1">Banner</p><img src={getImageUrl(form.banner)} alt="Banner" className="w-full h-24 object-cover rounded-lg border border-gray-200" onError={(e) => e.target.style.display = 'none'} /></div>}
+                                                {form.thumbnail && <div className="w-24"><p className="text-[10px] font-semibold text-[#001f6c]/60 uppercase mb-1">Thumbnail</p><img src={getImageUrl(form.thumbnail)} alt="Thumbnail" className="w-24 h-24 object-cover rounded-lg border border-gray-200" onError={(e) => e.target.style.display = 'none'} /></div>}
                                             </div>
                                         )}
                                     </div>
                                 </div>
                                 <div className="flex flex-col gap-1">
-                                    <label htmlFor="bl-images" className="text-xs font-semibold text-[#001f6c]">URLs de Galería <span className="font-normal text-gray-400">(una por línea)</span></label>
-                                    <textarea id="bl-images" rows={6} value={galleryValue} onChange={handleGallery} placeholder={"https://..."} className="w-full rounded-lg border border-[#ed6f00]/50 bg-white px-3 py-2 text-sm text-[#001f6c] focus:outline-none focus:ring-2 focus:ring-[#ed6f00]/40 transition font-mono" />
-                                    <p className="text-[11px] text-gray-400">{form.images.length} imágenes</p>
+                                    <FormGalleryUpload label="URLs de Galería" id="bl-images" value={form.images} onChange={handleGallery} />
                                 </div>
                             </div>
                         )}
@@ -236,6 +237,7 @@ const BlogForm = ({ lookups, editRow, onSaved, onCancelEdit }) => {
 
 // ── Page ──────────────────────────────────────────────────────────────────────
 const Blog = () => {
+    useDocumentTitle('Blog');
     const [posts, setPosts] = useState([]);
     const [lookups, setLookups] = useState({ blogCategories: [], blogTags: [] });
     const [loading, setLoading] = useState(true);
@@ -253,8 +255,8 @@ const Blog = () => {
     useEffect(() => { fetchData(); }, []);
 
     const handleArchive = async (row) => {
-        if (!window.confirm(`¿Eliminar "${row['post.name']}"?`)) return;
-        try { await api.delete(`/blog-posts/${row.blog_post_ID}`); fetchData(); } catch (err) { alert('Error al eliminar.'); }
+        if (!await showConfirm(`¿Eliminar "${row['post.name']}"?`)) return;
+        try { await api.delete(`/blog-posts/${row.blog_post_ID}`); fetchData(); } catch (err) { showError('Error al eliminar.'); }
     };
 
     return (

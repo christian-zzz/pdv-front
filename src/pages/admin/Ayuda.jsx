@@ -1,4 +1,5 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
+import useDocumentTitle from '../../hooks/useDocumentTitle';
 import {
     QuestionIcon,
     BookOpenTextIcon,
@@ -161,6 +162,8 @@ const MANUAL_SECTIONS = [
 ];
 
 const Ayuda = () => {
+    useDocumentTitle('Ayuda');
+    useDocumentTitle('Ayuda');
     const [activeTab, setActiveTab] = useState(MANUAL_SECTIONS[0].id);
 
     const activeSection = MANUAL_SECTIONS.find(s => s.id === activeTab);

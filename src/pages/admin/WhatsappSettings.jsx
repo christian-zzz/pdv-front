@@ -1,8 +1,11 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
+import useDocumentTitle from '../../hooks/useDocumentTitle';
 import api from '../../api/axios';
 import { CheckCircleIcon } from '@phosphor-icons/react';
 
 const WhatsappSettings = () => {
+    useDocumentTitle('WhatsApp');
+    useDocumentTitle('WhatsApp');
     const [status, setStatus] = useState({ connected: false });
     const [pairingCode, setPairingCode] = useState(null);
     const [loading, setLoading] = useState(true);

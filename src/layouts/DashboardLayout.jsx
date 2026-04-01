@@ -1,4 +1,3 @@
-import React from 'react';
 import { Outlet, Link } from 'react-router-dom';
 import Sidebar from '../components/dashboard/Sidebar';
 import logo from '../assets/logo.png';

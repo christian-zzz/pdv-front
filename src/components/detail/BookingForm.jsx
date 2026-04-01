@@ -3,14 +3,12 @@ import { XIcon, PaperPlaneRightIcon, CheckCircleIcon } from '@phosphor-icons/rea
 import api from '../../api/axios';
 
 /**
- * BookingForm — price display + consultation form.
+ * Formulario de consulta con precio visible.
  *
- * @param {number} postId         — Post ID supporting the inquiry creation
- * @param {string} price          — formatted price, e.g. "$2,499"
- * @param {string} priceLabel     — e.g. "/ persona"
- * @param {boolean} isFlight      — changes form behavior to suit flights
- * @param {boolean} isAccommodation — changes form to suit accommodations
- * @param {Array} roomTypes       — available room types for dropdown
+ * Se adapta según el tipo de producto:
+ * - Vuelos: opción de incluir vuelo de regreso
+ * - Alojamientos: selector de tipo de habitación
+ * - Paquetes: campos estándar de fechas y huéspedes
  */
 const BookingForm = ({ postId, price = '$0', priceLabel = '/ persona', isFlight = false, isAccommodation = false, roomTypes = [] }) => {
     const [form, setForm] = useState({
@@ -270,11 +268,7 @@ const BookingForm = ({ postId, price = '$0', priceLabel = '/ persona', isFlight 
                     <PaperPlaneRightIcon className="w-4 h-4"  />
                 </button>
 
-                {/* Cancellation note */}
-                <p className="hidden text-xs text-center text-gray-400 flex items-center justify-center gap-1 mt-1">
-                    <CheckCircleIcon className="w-3.5 h-3.5 text-green-500" />
-                    Cancelación gratuita hasta 48 horas antes
-                </p>
+
             </form>
         </div>
     );
